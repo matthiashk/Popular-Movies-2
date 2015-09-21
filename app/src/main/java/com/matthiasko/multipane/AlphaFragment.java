@@ -50,6 +50,4 @@ public class AlphaFragment extends Fragment {
         }
     }
 
-
-
 }

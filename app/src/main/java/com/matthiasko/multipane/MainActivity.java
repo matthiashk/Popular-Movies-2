@@ -8,9 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class MainActivity extends ActionBarActivity
-    implements AlphaFragment.OnHeadlineSelectedListener {
-
+public class MainActivity extends ActionBarActivity implements AlphaFragment.OnHeadlineSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,34 +20,13 @@ public class MainActivity extends ActionBarActivity
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
-            //hideAlphaPane();
-            //showOmegaPane();
 
-            System.out.println("MAINACTIVITY ONCREATE PORTRAIT");
-
-            //FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-
-            //fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
-            //fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right, R.anim.enter_from_left, R.anim.exit_to_right);
-
             fragmentTransaction.hide(omegaFrag);
-
-            //fragmentTransaction.addToBackStack(null);
-
             fragmentTransaction.commit();
-
-
-
-
-            // show back button
-            //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -70,7 +47,6 @@ public class MainActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -85,41 +61,27 @@ public class MainActivity extends ActionBarActivity
             int screenOrientation = getResources().getConfiguration().orientation;
             if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
                     && omegaPane.getVisibility() == View.VISIBLE) {
-                //hideOmegaPane();
-                //showAlphaPane();
-
 
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
-                //fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
                 fragmentTransaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
-
-                //fragmentTransaction.addToBackStack(null);
 
                 fragmentTransaction.show(alphaFrag);
 
                 fragmentTransaction.hide(omegaFrag);
 
-                //fragmentTransaction.addToBackStack(null);
-
                 fragmentTransaction.commit();
-
 
                 // hide back button
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                //System.out.println("MAIN - HOMEBACKPRESSED (ACTIONBAR)");
             }
 
             return true;
         }
 
-
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Method to hide the Alpha pane
-     */
     private void hideOmegaPane() {
         View omegaPane = findViewById(R.id.omega);
         if (omegaPane.getVisibility() == View.VISIBLE) {
@@ -127,9 +89,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    /**
-     * Method to show the Alpha pane
-     */
     private void showOmegaPane() {
         View omegaPane = findViewById(R.id.omega);
         if (omegaPane.getVisibility() == View.GONE) {
@@ -138,7 +97,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-
     private void hideAlphaPane() {
         View alphaPane = findViewById(R.id.alpha);
         if (alphaPane.getVisibility() == View.VISIBLE) {
@@ -146,17 +104,12 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    /**
-     * Method to show the Alpha pane
-     */
     private void showAlphaPane() {
         View alphaPane = findViewById(R.id.alpha);
         if (alphaPane.getVisibility() == View.GONE) {
             alphaPane.setVisibility(View.VISIBLE);
         }
     }
-
-
 
     public void onArticleSelected() {
         // The user selected the headline of an article from the HeadlinesFragment
@@ -167,32 +120,17 @@ public class MainActivity extends ActionBarActivity
         AlphaFragment alphaFrag = (AlphaFragment) getFragmentManager()
                 .findFragmentById(R.id.alpha);
 
-
-        String backStateName = alphaFrag.getClass().getName();
+        //String backStateName = alphaFrag.getClass().getName();
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
-            //hideAlphaPane();
-            //showOmegaPane();
 
-
-            //FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
-            //fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
             fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-
-
             fragmentTransaction.show(omegaFrag);
-
             fragmentTransaction.hide(alphaFrag);
-
-            //fragmentTransaction.addToBackStack(backStateName);
-
             fragmentTransaction.commit();
-
-
-
 
             // show back button
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -209,6 +147,8 @@ public class MainActivity extends ActionBarActivity
             articleFrag.updateArticleView();
 
         } else {
+
+            // ...
 
         }
     }
