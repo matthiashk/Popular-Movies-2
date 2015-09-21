@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -30,9 +31,21 @@ public class OmegaFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_main, menu);
+
         super.onCreateOptionsMenu(menu, inflater);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                //getFragmentManager().popBackStack();
 
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -51,6 +64,18 @@ public class OmegaFragment extends Fragment {
             sampleText.setText(savedState.getCharSequence("WORKS!"));
         }
         savedState = null;
+
+        /*
+        * display only in portrait mode AND when we are not hidden
+        *
+        *
+        *
+        *
+        * */
+
+
+
+        //((ActionBarActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         return view;
     }

@@ -6,7 +6,7 @@
     android:animateLayoutChanges="true"
     android:baselineAligned="false"
     android:orientation="horizontal"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity">
 
 
     <fragment

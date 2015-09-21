@@ -17,24 +17,36 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        OmegaFragment articleFrag = (OmegaFragment)
-                getFragmentManager().findFragmentById(R.id.omega);
-
-        if (articleFrag != null) {
-
-            FragmentTransaction fragmentTransaction = this.getFragmentManager().beginTransaction();
-
-            fragmentTransaction.replace(R.id.omega, articleFrag, "articleFragment");
-            fragmentTransaction.addToBackStack("articleFragment");
-            fragmentTransaction.commit();
-
-            //System.out.println("addingtobackstack");
-        }
+        OmegaFragment omegaFrag = (OmegaFragment) getFragmentManager()
+                .findFragmentById(R.id.omega);
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
-            //hideOmegaPane();
+            //hideAlphaPane();
+            //showOmegaPane();
+
+            System.out.println("MAINACTIVITY ONCREATE PORTRAIT");
+
+            //FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+
+            //fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+            //fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right, R.anim.enter_from_left, R.anim.exit_to_right);
+
+            fragmentTransaction.hide(omegaFrag);
+
+            //fragmentTransaction.addToBackStack(null);
+
+            fragmentTransaction.commit();
+
+
+
+
+            // show back button
+            //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+
     }
 
 
@@ -48,6 +60,11 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        OmegaFragment omegaFrag = (OmegaFragment) getFragmentManager()
+                .findFragmentById(R.id.omega);
+
+        AlphaFragment alphaFrag = (AlphaFragment) getFragmentManager()
+                .findFragmentById(R.id.alpha);
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -57,6 +74,45 @@ public class MainActivity extends ActionBarActivity
         if (id == R.id.action_settings) {
             return true;
         }
+
+        if (id == android.R.id.home) {
+
+            View omegaPane = findViewById(R.id.omega);
+
+            // only execute if we are in portrait AND the omegaPane is visible
+            // we have to mirror this action for the back button on the action bar...
+
+            int screenOrientation = getResources().getConfiguration().orientation;
+            if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
+                    && omegaPane.getVisibility() == View.VISIBLE) {
+                //hideOmegaPane();
+                //showAlphaPane();
+
+
+                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+
+                //fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+                fragmentTransaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
+
+                //fragmentTransaction.addToBackStack(null);
+
+                fragmentTransaction.show(alphaFrag);
+
+                fragmentTransaction.hide(omegaFrag);
+
+                //fragmentTransaction.addToBackStack(null);
+
+                fragmentTransaction.commit();
+
+
+                // hide back button
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                //System.out.println("MAIN - HOMEBACKPRESSED (ACTIONBAR)");
+            }
+
+            return true;
+        }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -77,6 +133,7 @@ public class MainActivity extends ActionBarActivity
     private void showOmegaPane() {
         View omegaPane = findViewById(R.id.omega);
         if (omegaPane.getVisibility() == View.GONE) {
+
             omegaPane.setVisibility(View.VISIBLE);
         }
     }
@@ -104,9 +161,41 @@ public class MainActivity extends ActionBarActivity
     public void onArticleSelected() {
         // The user selected the headline of an article from the HeadlinesFragment
 
+        OmegaFragment omegaFrag = (OmegaFragment) getFragmentManager()
+                .findFragmentById(R.id.omega);
+
+        AlphaFragment alphaFrag = (AlphaFragment) getFragmentManager()
+                .findFragmentById(R.id.alpha);
+
+
+        String backStateName = alphaFrag.getClass().getName();
+
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
-            hideAlphaPane();
+            //hideAlphaPane();
+            //showOmegaPane();
+
+
+            //FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+
+            //fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+            fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+
+
+            fragmentTransaction.show(omegaFrag);
+
+            fragmentTransaction.hide(alphaFrag);
+
+            //fragmentTransaction.addToBackStack(backStateName);
+
+            fragmentTransaction.commit();
+
+
+
+
+            // show back button
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         // Capture the article fragment from the activity layout
@@ -126,13 +215,23 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onBackPressed() {
-        if (getFragmentManager().getBackStackEntryCount() > 0 ){
-            getFragmentManager().popBackStack();
-            //getFragmentManager().executePendingTransactions();
 
-            //System.out.println("POPBACKSTACK");
+        View omegaPane = findViewById(R.id.omega);
+
+        // only execute if we are in portrait AND the omegaPane is visible
+        // we have to mirror this action for the back button on the action bar...
+
+        int screenOrientation = getResources().getConfiguration().orientation;
+        if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
+                && omegaPane.getVisibility() == View.VISIBLE) {
+            hideOmegaPane();
+            showAlphaPane();
+            // hide back button
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            //System.out.println("MAIN - BACKPRESSED (BACK NAV BUTTON)");
         } else {
             super.onBackPressed();
         }
     }
+
 }
