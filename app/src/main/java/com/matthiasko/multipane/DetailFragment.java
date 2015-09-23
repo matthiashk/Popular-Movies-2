@@ -13,7 +13,7 @@ import android.widget.TextView;
 /**
  * Created by matthiasko on 9/19/15.
  */
-public class OmegaFragment extends Fragment {
+public class DetailFragment extends Fragment {
     private TextView sampleText;
     private Bundle savedState = null;
 
@@ -22,8 +22,6 @@ public class OmegaFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
-
-
 
         // save the fragment that was already created here?
         //System.out.println("OMEGAFRAGMENT - ONCREATE");
@@ -50,7 +48,7 @@ public class OmegaFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_omega, container, false);
+        View view = inflater.inflate(R.layout.detail_fragment, container, false);
 
 
         sampleText = (TextView)view.findViewById(R.id.omegaText);

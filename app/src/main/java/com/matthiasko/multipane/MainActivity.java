@@ -1,6 +1,7 @@
 package com.matthiasko.multipane;
 
 import android.app.FragmentTransaction;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -8,22 +9,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class MainActivity extends ActionBarActivity implements AlphaFragment.OnHeadlineSelectedListener {
+public class MainActivity extends ActionBarActivity implements GridFragment.OnHeadlineSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        OmegaFragment omegaFrag = (OmegaFragment) getFragmentManager()
-                .findFragmentById(R.id.omega);
+        DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+                .findFragmentById(R.id.detail_fragment);
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
 
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-            fragmentTransaction.hide(omegaFrag);
+            fragmentTransaction.hide(detailFragment);
             fragmentTransaction.commit();
+        }
+
+        if(getResources().getBoolean(R.bool.portrait_only)){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
 
     }
@@ -37,11 +42,11 @@ public class MainActivity extends ActionBarActivity implements AlphaFragment.OnH
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        OmegaFragment omegaFrag = (OmegaFragment) getFragmentManager()
-                .findFragmentById(R.id.omega);
+        DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+                .findFragmentById(R.id.detail_fragment);
 
-        AlphaFragment alphaFrag = (AlphaFragment) getFragmentManager()
-                .findFragmentById(R.id.alpha);
+        GridFragment gridFragment = (GridFragment) getFragmentManager()
+                .findFragmentById(R.id.grid_fragment);
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -53,23 +58,19 @@ public class MainActivity extends ActionBarActivity implements AlphaFragment.OnH
 
         if (id == android.R.id.home) {
 
-            View omegaPane = findViewById(R.id.omega);
+            View gridPane = findViewById(R.id.detail_fragment);
 
-            // only execute if we are in portrait AND the omegaPane is visible
+            // only execute if we are in portrait AND the gridPane is visible
             // we have to mirror this action for the back button on the action bar...
 
             int screenOrientation = getResources().getConfiguration().orientation;
             if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
-                    && omegaPane.getVisibility() == View.VISIBLE) {
+                    && gridPane.getVisibility() == View.VISIBLE) {
 
                 FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-
                 fragmentTransaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
-
-                fragmentTransaction.show(alphaFrag);
-
-                fragmentTransaction.hide(omegaFrag);
-
+                fragmentTransaction.show(gridFragment);
+                fragmentTransaction.hide(detailFragment);
                 fragmentTransaction.commit();
 
                 // hide back button
@@ -82,45 +83,14 @@ public class MainActivity extends ActionBarActivity implements AlphaFragment.OnH
         return super.onOptionsItemSelected(item);
     }
 
-    private void hideOmegaPane() {
-        View omegaPane = findViewById(R.id.omega);
-        if (omegaPane.getVisibility() == View.VISIBLE) {
-            omegaPane.setVisibility(View.GONE);
-        }
-    }
-
-    private void showOmegaPane() {
-        View omegaPane = findViewById(R.id.omega);
-        if (omegaPane.getVisibility() == View.GONE) {
-
-            omegaPane.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void hideAlphaPane() {
-        View alphaPane = findViewById(R.id.alpha);
-        if (alphaPane.getVisibility() == View.VISIBLE) {
-            alphaPane.setVisibility(View.GONE);
-        }
-    }
-
-    private void showAlphaPane() {
-        View alphaPane = findViewById(R.id.alpha);
-        if (alphaPane.getVisibility() == View.GONE) {
-            alphaPane.setVisibility(View.VISIBLE);
-        }
-    }
-
     public void onArticleSelected() {
         // The user selected the headline of an article from the HeadlinesFragment
 
-        OmegaFragment omegaFrag = (OmegaFragment) getFragmentManager()
-                .findFragmentById(R.id.omega);
+        DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+                .findFragmentById(R.id.detail_fragment);
 
-        AlphaFragment alphaFrag = (AlphaFragment) getFragmentManager()
-                .findFragmentById(R.id.alpha);
-
-        //String backStateName = alphaFrag.getClass().getName();
+        GridFragment gridFragment = (GridFragment) getFragmentManager()
+                .findFragmentById(R.id.grid_fragment);
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -128,23 +98,18 @@ public class MainActivity extends ActionBarActivity implements AlphaFragment.OnH
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
             fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-            fragmentTransaction.show(omegaFrag);
-            fragmentTransaction.hide(alphaFrag);
+            fragmentTransaction.show(detailFragment);
+            fragmentTransaction.hide(gridFragment);
             fragmentTransaction.commit();
 
             // show back button
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Capture the article fragment from the activity layout
-        OmegaFragment articleFrag = (OmegaFragment)
-                getFragmentManager().findFragmentById(R.id.omega);
+        // Capture the detail fragment from the activity layout
 
-        if (articleFrag != null) {
-            // If article frag is available, we're in two-pane layout...
-
-            // Call a method in the ArticleFragment to update its content
-            articleFrag.updateArticleView();
+        if (detailFragment != null) {
+            detailFragment.updateArticleView();
 
         } else {
 
@@ -155,20 +120,29 @@ public class MainActivity extends ActionBarActivity implements AlphaFragment.OnH
 
     @Override
     public void onBackPressed() {
+        DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+                .findFragmentById(R.id.detail_fragment);
 
-        View omegaPane = findViewById(R.id.omega);
+        GridFragment gridFragment = (GridFragment) getFragmentManager()
+                .findFragmentById(R.id.grid_fragment);
 
-        // only execute if we are in portrait AND the omegaPane is visible
+        View gridPane = findViewById(R.id.detail_fragment);
+
+        // only execute if we are in portrait AND the gridPane is visible
         // we have to mirror this action for the back button on the action bar...
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
-                && omegaPane.getVisibility() == View.VISIBLE) {
-            hideOmegaPane();
-            showAlphaPane();
+                && gridPane.getVisibility() == View.VISIBLE) {
+
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
+            fragmentTransaction.show(gridFragment);
+            fragmentTransaction.hide(detailFragment);
+            fragmentTransaction.commit();
+
             // hide back button
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            //System.out.println("MAIN - BACKPRESSED (BACK NAV BUTTON)");
         } else {
             super.onBackPressed();
         }

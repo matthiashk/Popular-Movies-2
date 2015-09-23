@@ -11,19 +11,19 @@
     android:background="@android:color/black">
 
     <fragment
-        android:id="@+id/omega"
+        android:id="@+id/grid_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        class="com.matthiasko.multipane.OmegaFragment" />
+        class="com.matthiasko.multipane.GridFragment" />
 
     <fragment
-        android:id="@+id/alpha"
+        android:id="@+id/detail_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        class="com.matthiasko.multipane.AlphaFragment" />
+        class="com.matthiasko.multipane.DetailFragment" />
 
 </RelativeLayout>

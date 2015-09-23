@@ -10,17 +10,17 @@
 
 
     <fragment
-        android:id="@+id/alpha"
+        android:id="@+id/grid_fragment"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        class="com.matthiasko.multipane.AlphaFragment" />
+        class="com.matthiasko.multipane.GridFragment" />
 
 
     <fragment
-        android:id="@+id/omega"
+        android:id="@+id/detail_fragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        class="com.matthiasko.multipane.OmegaFragment" />
+        class="com.matthiasko.multipane.DetailFragment" />
 
 </LinearLayout>

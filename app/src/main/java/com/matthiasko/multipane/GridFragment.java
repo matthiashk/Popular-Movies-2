@@ -11,7 +11,7 @@ import android.widget.Button;
 /**
  * Created by matthiasko on 9/19/15.
  */
-public class AlphaFragment extends Fragment {
+public class GridFragment extends Fragment {
     OnHeadlineSelectedListener mCallback;
 
     public interface OnHeadlineSelectedListener {
@@ -21,7 +21,7 @@ public class AlphaFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_alpha, container, false);
+        View view = inflater.inflate(R.layout.grid_frament, container, false);
 
         Button button = (Button) view.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener()
