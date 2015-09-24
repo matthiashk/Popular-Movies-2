@@ -1,6 +1,7 @@
 package com.matthiasko.multipane;
 
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // hide the detail fragment in portrait mode
         DetailFragment detailFragment = (DetailFragment) getFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
 
@@ -25,9 +27,16 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
             FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
             fragmentTransaction.hide(detailFragment);
             fragmentTransaction.commit();
+
+            //System.out.println("PORTRAIT DETECTED - DETAIL FRAGMENT HIDDEN");
         }
 
+
+        // dont show landscape mode on phones
         if(getResources().getBoolean(R.bool.portrait_only)){
+
+
+
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
 
@@ -53,6 +62,9 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
+            Intent settings = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(settings);
+
             return true;
         }
 
@@ -83,8 +95,15 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         return super.onOptionsItemSelected(item);
     }
 
-    public void onArticleSelected() {
-        // The user selected the headline of an article from the HeadlinesFragment
+    public void onArticleSelected(Bundle bundle) {
+        // The user selected a movie from the GridFragment
+
+        /*
+        * we should shoe the detail fragment here?
+        *
+        *
+        * */
+
 
         DetailFragment detailFragment = (DetailFragment) getFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
@@ -109,7 +128,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         // Capture the detail fragment from the activity layout
 
         if (detailFragment != null) {
-            detailFragment.updateArticleView();
+            detailFragment.updateArticleView(bundle);
 
         } else {
 

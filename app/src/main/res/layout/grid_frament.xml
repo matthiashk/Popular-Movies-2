@@ -5,16 +5,15 @@
     android:background="@android:color/holo_blue_bright"
     android:orientation="vertical" >
 
-    <TextView
+    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/gridview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Alpha pane Alpha pane Alpha pane" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Press Me"
-        android:id="@+id/button" />
-
+        android:columnWidth="180dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+        android:layout_weight="1"
+        />
 
 </LinearLayout>
