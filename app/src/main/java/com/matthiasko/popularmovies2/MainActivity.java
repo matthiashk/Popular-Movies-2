@@ -1,10 +1,10 @@
-package com.matthiasko.multipane;
+package com.matthiasko.popularmovies2;
 
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,14 +17,16 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //System.out.println("MainActivity - onCreate");
+
         // hide the detail fragment in portrait mode
-        DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+        DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
 
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.hide(detailFragment);
             fragmentTransaction.commit();
 
@@ -34,9 +36,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
 
         // dont show landscape mode on phones
         if(getResources().getBoolean(R.bool.portrait_only)){
-
-
-
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
 
@@ -51,10 +50,10 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+        DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
 
-        GridFragment gridFragment = (GridFragment) getFragmentManager()
+        GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.grid_fragment);
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -79,7 +78,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
             if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
                     && gridPane.getVisibility() == View.VISIBLE) {
 
-                FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
                 fragmentTransaction.show(gridFragment);
                 fragmentTransaction.hide(detailFragment);
@@ -105,16 +104,16 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         * */
 
 
-        DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+        DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
 
-        GridFragment gridFragment = (GridFragment) getFragmentManager()
+        GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.grid_fragment);
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
 
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
             fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
             fragmentTransaction.show(detailFragment);
@@ -139,10 +138,10 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
 
     @Override
     public void onBackPressed() {
-        DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+        DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
 
-        GridFragment gridFragment = (GridFragment) getFragmentManager()
+        GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.grid_fragment);
 
         View gridPane = findViewById(R.id.detail_fragment);
@@ -154,7 +153,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
                 && gridPane.getVisibility() == View.VISIBLE) {
 
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
             fragmentTransaction.show(gridFragment);
             fragmentTransaction.hide(detailFragment);

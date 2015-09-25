@@ -16,7 +16,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        class="com.matthiasko.multipane.GridFragment" />
+        class="com.matthiasko.popularmovies2.GridFragment" />
 
     <fragment
         android:id="@+id/detail_fragment"
@@ -24,6 +24,6 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        class="com.matthiasko.multipane.DetailFragment" />
+        class="com.matthiasko.popularmovies2.DetailFragment" />
 
 </RelativeLayout>

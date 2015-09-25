@@ -13,7 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        class="com.matthiasko.multipane.GridFragment"
+        class="com.matthiasko.popularmovies2.GridFragment"
         />
 
     <fragment
@@ -21,6 +21,6 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        class="com.matthiasko.multipane.DetailFragment" />
+        class="com.matthiasko.popularmovies2.DetailFragment" />
 
 </LinearLayout>

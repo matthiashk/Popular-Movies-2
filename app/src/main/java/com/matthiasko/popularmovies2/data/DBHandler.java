@@ -1,50 +1,19 @@
-package com.matthiasko.multipane;
+package com.matthiasko.popularmovies2.data;
 
 /**
  * Created by matthiasko on 9/13/15.
  */
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
-import java.util.ArrayList;
+import com.matthiasko.popularmovies2.data.MovieContract.MovieEntry;
 
-public class DBHandler extends SQLiteOpenHelper implements MovieListener{
-
-    public static final String TABLE_MOVIES = "movies";
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_TITLE = "title";
-    public static final String COLUMN_POSTER_PATH = "poster_path";
-    public static final String COLUMN_PLOT = "plot";
-    public static final String COLUMN_USER_RATING = "user_rating"; // vote_average in api
-    public static final String COLUMN_RELEASE_DATE = "release_date";
-
-    // popularity and vote count needed for sorting
-    public static final String COLUMN_POPULARITY = "popularity";
-    public static final String COLUMN_VOTE_COUNT = "vote_count";
-
-    public static final String COLUMN_MOVIE_ID = "movie_id";
+public class DBHandler extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "movies.db";
     private static final int DATABASE_VERSION = 1;
-
-    // Database creation sql statement
-    private static final String DATABASE_CREATE = "create table "
-            + TABLE_MOVIES + "(" +
-            COLUMN_ID + " integer primary key autoincrement, " +
-            COLUMN_TITLE + " text not null," +
-            COLUMN_POSTER_PATH + " text not null," +
-            COLUMN_PLOT + " text not null," +
-            COLUMN_USER_RATING + " float," +
-            COLUMN_RELEASE_DATE + " text not null," +
-            COLUMN_POPULARITY + " integer," +
-            COLUMN_VOTE_COUNT + " integer," +
-            COLUMN_MOVIE_ID + " integer" +
-            ");";
 
     public DBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -52,15 +21,31 @@ public class DBHandler extends SQLiteOpenHelper implements MovieListener{
 
     @Override
     public void onCreate(SQLiteDatabase database) {
+
+        final String DATABASE_CREATE = "create table "
+                + MovieEntry.TABLE_NAME + "(" +
+                MovieEntry.COLUMN_ID + " integer primary key autoincrement, " +
+                MovieEntry.COLUMN_TITLE + " text not null," +
+                MovieEntry.COLUMN_POSTER_PATH + " text not null," +
+                MovieEntry.COLUMN_PLOT + " text not null," +
+                MovieEntry.COLUMN_USER_RATING + " float," +
+                MovieEntry.COLUMN_RELEASE_DATE + " text not null," +
+                MovieEntry.COLUMN_POPULARITY + " integer," +
+                MovieEntry.COLUMN_VOTE_COUNT + " integer," +
+                MovieEntry.COLUMN_MOVIE_ID + " integer" +
+                ");";
+
         database.execSQL(DATABASE_CREATE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MOVIES);
+        // comment out the following line if you want to upgrade the db without wiping data
+        db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
         onCreate(db);
     }
 
+    /*
     @Override
     public void addMovie(TmdbMovie movie) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -189,5 +174,6 @@ public class DBHandler extends SQLiteOpenHelper implements MovieListener{
         }
         return movieList;
     }
+    */
 
 }

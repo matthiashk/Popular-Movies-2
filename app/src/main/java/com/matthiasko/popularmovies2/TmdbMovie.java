@@ -1,4 +1,4 @@
-package com.matthiasko.multipane;
+package com.matthiasko.popularmovies2;
 
 /** Class for storing movie data
  *

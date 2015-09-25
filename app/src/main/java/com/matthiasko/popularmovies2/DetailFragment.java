@@ -1,7 +1,12 @@
-package com.matthiasko.multipane;
+package com.matthiasko.popularmovies2;
 
-import android.app.Fragment;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,22 +17,62 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.matthiasko.popularmovies2.data.MovieContract.MovieEntry;
 import com.squareup.picasso.Picasso;
 
 /**
  * Created by matthiasko on 9/19/15.
  */
-public class DetailFragment extends Fragment {
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    public static String movieTitle = null;
-    public static String posterPath = null;
-    public static String plot = null;
-    public static double userRating = 0;
-    public static String releaseDate = null;
+    private String movieTitle = null;
+    private String posterPath = null;
+    private String plot = null;
+    private double userRating = 0;
+    private String releaseDate = null;
+
+    public static final String CONTENT_AUTHORITY = "com.matthiasko.popularmovies2";
+
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+    public static final String PATH_MOVIE = "movie";
+
+
+    public static final Uri CONTENT_URI =
+            BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
+
+
     //public static View view;
 
     private Bundle savedState = null;
 
+    private static final String[] PROJECTION = new String[] { "_id", "title" };
+
+    private static final int DETAIL_LOADER = 0;
+
+    private static final String[] DETAIL_COLUMNS = {
+            MovieEntry.TABLE_NAME + "." + MovieEntry._ID,
+            MovieEntry.COLUMN_TITLE,
+            MovieEntry.COLUMN_POSTER_PATH,
+            MovieEntry.COLUMN_PLOT,
+            MovieEntry.COLUMN_USER_RATING,
+            MovieEntry.COLUMN_RELEASE_DATE,
+            MovieEntry.COLUMN_POPULARITY,
+            MovieEntry.COLUMN_VOTE_COUNT,
+            MovieEntry.COLUMN_MOVIE_ID,
+    };
+
+
+    public static final int COL_MOVIE_ID = 0;
+    public static final int COL_MOVIE_TITLE = 1;
+    public static final int COL_MOVIE_POSTER_PATH = 2;
+    public static final int COL_MOVIE_PLOT = 3;
+    public static final int COL_MOVIE_USER_RATING = 4;
+    public static final int COL_MOVIE_RELEASE_DATE = 5;
+    public static final int COL_MOVIE_POPULARITY = 6;
+    public static final int COL_MOVIE_VOTE_COUNT = 7;
+
+    /*
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +91,7 @@ public class DetailFragment extends Fragment {
         // save the fragment that was already created here?
         //System.out.println("OMEGAFRAGMENT - ONCREATE");
     }
+    */
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -106,6 +152,7 @@ public class DetailFragment extends Fragment {
         //Log.v("DETAILFRAG", "ONVIEWCREATED");
         //System.out.println("movieTitle:" + movieTitle);
         //System.out.println("releaseDate:" + releaseDate);
+        /*
         ((TextView) getView().findViewById(R.id.details_movie_title))
                 .setText(movieTitle);
 
@@ -141,7 +188,83 @@ public class DetailFragment extends Fragment {
                 .centerCrop()
                 .resize(600, 900)
                 .into(imageView);
-        //System.out.println("ORIENTATION:" + getRotation(getActivity()));
+        //System.out.println("ORIENTATION:" + getRotation(getActivity()));*/
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+
+        // this was crashing...had to fix oncreateloader
+        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        //Log.v(LOG_TAG, "In onCreateLoader");
+
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        return new CursorLoader(
+                getActivity(),
+                CONTENT_URI,
+                PROJECTION,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+       /* if (data != null && data.moveToFirst()) {
+
+            String lTitle = data.getString(COL_MOVIE_TITLE);
+            ((TextView) getView().findViewById(R.id.details_movie_title))
+                    .setText(lTitle);
+
+            String lPlot = data.getString(COL_MOVIE_PLOT);
+            ((TextView) getView().findViewById(R.id.details_plot))
+                    .setText(lPlot);
+
+            // allow user to scroll the view containing the plot synopsis
+            ((TextView) getView().findViewById(R.id.details_plot))
+                    .setMovementMethod(new ScrollingMovementMethod());
+
+            double lUserRating = data.getDouble(COL_MOVIE_USER_RATING);
+
+            // format the user rating, add '/10'
+            String formattedUserRating = String.format("%.1f", lUserRating) + "/10";
+
+            ((TextView) getView().findViewById(R.id.details_user_rating))
+                    .setText(formattedUserRating);
+
+            String lReleaseDate = data.getString(COL_MOVIE_RELEASE_DATE);
+
+            ((TextView) getView().findViewById(R.id.details_release_date))
+                    .setText(lReleaseDate);
+
+            String lPosterPath = data.getString(COL_MOVIE_POSTER_PATH);
+
+            // construct url for the full posterpath
+            String baseURL = "http://image.tmdb.org/t/p/";
+            String thumbSize = "w185";
+            String posterURL = null;
+            posterURL = baseURL + thumbSize + lPosterPath;
+
+            ImageView imageView = ((ImageView) getView().findViewById(R.id.details_imageview));
+
+            Picasso.with(getActivity())
+                    .load(posterURL)
+                            //.placeholder(R.drawable.weather)
+                    .centerCrop()
+                    .resize(600, 900)
+                    .into(imageView);
+
+
+        }*/
     }
 
     public void updateArticleView(Bundle bundle) {
@@ -228,5 +351,10 @@ public class DetailFragment extends Fragment {
         // need to call refresh here?
         //System.out.println("xmovieTitle:" + movieTitle);
         //landscapeBundle = bundle;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 }

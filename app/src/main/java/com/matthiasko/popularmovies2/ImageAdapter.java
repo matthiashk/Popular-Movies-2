@@ -1,4 +1,4 @@
-package com.matthiasko.multipane;
+package com.matthiasko.popularmovies2;
 
 import android.content.Context;
 import android.view.View;
@@ -41,6 +41,9 @@ public class ImageAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
+
+        System.out.println("ImageAdapter - getView");
+
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams
                 .FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
 

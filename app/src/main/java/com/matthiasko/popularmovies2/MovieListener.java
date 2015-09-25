@@ -1,4 +1,4 @@
-package com.matthiasko.multipane;
+package com.matthiasko.popularmovies2;
 
 import java.util.ArrayList;
 
