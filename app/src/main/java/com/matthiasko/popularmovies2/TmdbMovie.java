@@ -1,9 +1,12 @@
 package com.matthiasko.popularmovies2;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /** Class for storing movie data
  *
  */
-public class TmdbMovie {
+public class TmdbMovie implements Parcelable {
 
     long id;
     String title;
@@ -101,5 +104,47 @@ public class TmdbMovie {
         this.popularity = popularity;
         this.voteCount = voteCount;
         this.movieId = movieId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+        dest.writeLong(id);
+        dest.writeString(title);
+        dest.writeString(posterPath);
+        dest.writeString(plot);
+        dest.writeDouble(userRating);
+        dest.writeString(releaseDate);
+        dest.writeInt(popularity);
+        dest.writeInt(voteCount);
+        dest.writeInt(movieId);
+    }
+
+    public static final Parcelable.Creator<TmdbMovie> CREATOR = new Parcelable.Creator<TmdbMovie>() {
+        public TmdbMovie createFromParcel(Parcel pc) {
+            return new TmdbMovie(pc);
+        }
+
+        public TmdbMovie[] newArray(int size) {
+            return new TmdbMovie[size];
+        }
+    };
+
+    public TmdbMovie (Parcel source) {
+
+        id = source.readInt();
+        title = source.readString();
+        posterPath = source.readString();
+        plot = source.readString();
+        userRating = source.readDouble();
+        releaseDate = source.readString();
+        popularity = source.readInt();
+        voteCount = source.readInt();
+        movieId = source.readInt();
     }
 }

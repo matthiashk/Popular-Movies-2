@@ -48,6 +48,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     private GridView mGridview;
     public static ArrayList<String> posterUrls = new ArrayList<String>();
     DBHandler handler;
+    private List<String> mUriPaths = new ArrayList<String>();
 
     public static final String CONTENT_AUTHORITY = "com.matthiasko.popularmovies2";
 
@@ -64,8 +65,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
     OnHeadlineSelectedListener mCallback;
 
-
-
     private static final int DETAIL_LOADER = 0;
 
     private static final String[] DETAIL_COLUMNS = {
@@ -80,7 +79,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             MovieEntry.COLUMN_MOVIE_ID,
     };
 
-
     public static final int COL_MOVIE_ID = 0;
     public static final int COL_MOVIE_TITLE = 1;
     public static final int COL_MOVIE_POSTER_PATH = 2;
@@ -90,13 +88,8 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     public static final int COL_MOVIE_POPULARITY = 6;
     public static final int COL_MOVIE_VOTE_COUNT = 7;
 
-
-
     public GridFragment() {
     }
-
-
-
 
     public interface OnHeadlineSelectedListener {
         /** Called by HeadlinesFragment when a list item is selected */
@@ -104,8 +97,41 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //System.out.println("GRIDFRAGMENT - onCreate");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.grid_frament, container, false);
+
+        // checking mImageAdapter for null doesnt work here...
+
+        mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), mUriPaths);
+        mGridview = (GridView) view.findViewById(R.id.gridview);
+
+        mGridview.setAdapter(mImageAdapter);
+
+        //System.out.println("GRIDFRAGMENT - onCreateView");
+
+        /* // call this in oncreate?
+        mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), null);
+        mGridview = (GridView) view.findViewById(R.id.gridview);
+
+        mGridview.setAdapter(mImageAdapter);
+        */
+
+        /*
+        if (savedInstanceState == null) {
+
+            System.out.println("GRIDFRAGMENT - savedInstanceState is null");
+
+        } else {
+
+            System.out.println("GRIDFRAGMENT - savedInstanceState is NOT null");
+        }*/
+
 
         /*
         Button button = (Button) view.findViewById(R.id.button);
@@ -120,10 +146,56 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         });
         */
 
-
-        mGridview = (GridView) view.findViewById(R.id.gridview);
-
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        /*
+            use parcelable movie class and putparcable method to save movies in bundle
+         */
+
+        //Intent parcelIntent = new Intent();
+        //ArrayList<TmdbMovie> dataList = new ArrayList<TmdbMovie>();
+        /*
+         * Add elements in dataLists e.g.
+         * ParcelData pd1 = new ParcelData();
+         * ParcelData pd2 = new ParcelData();
+         *
+         * fill in data in pd1 and pd2
+         *
+         * dataLists.add(pd1);
+         * dataLists.add(pd2);
+         */
+
+
+
+/*
+        TmdbMovie movie1 = new TmdbMovie();
+
+        movie1.setTitle("Mad Max");
+        movie1.setPosterPath("myposterpath");
+        movie1.setPlot("in a world...");
+        movie1.setUserRating(9);
+        movie1.setReleaseDate("1-1-2015");
+        movie1.setPopularity(7);
+        movie1.setVoteCount(11);
+        movie1.setMovieId(0000001);
+
+        dataList.add(movie1);
+        */
+
+
+        //outState.putParcelableArrayList("custom_data_list", dataList);
+
+        outState.putStringArrayList("custom_data_list", (ArrayList<String>)mUriPaths);
+
+
+
+
+
+
     }
 
     @Override
@@ -142,20 +214,63 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        //getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+
         super.onActivityCreated(savedInstanceState);
 
+        //setRetainInstance(true);
+
+
+
+
+
+
+
+
+        if (savedInstanceState == null) {
+
+            //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
+
+
+        } else {
+
+            //List<String> uriPaths = new ArrayList<String>();
+
+            //ArrayList<TmdbMovie> dataList = new ArrayList<TmdbMovie>();
+
+            //Intent intent = getActivity().getIntent();
+
+            //uriPaths = savedInstanceState.getStringArrayList("custom_data_list");
+
+            //TmdbMovie movie1 = (TmdbMovie) dataList.get(0);
+
+            //System.out.println("GRIDFRAGMENT - EXTRA = " + uriPaths.get(0));
+
+
+            // get savedInstanceState here and set to adapter?
+
+            //String fromBundle = savedInstanceState.getString("myKey");
+
+            //System.out.println("GRIDFRAGMENT - fromBundle = " + fromBundle);
+
+
+            //mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), uriPaths);
+            //mGridview.setAdapter(mImageAdapter);
+            //mImageAdapter.notifyDataSetChanged();
+
+
+            // this fixed issues with displaying images after rotation change
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+
+        }
+
         //System.out.println("GRIDFRAGMENT - onActivityCreated");
-
-
         /*
         //handler = new DBHandler(getActivity());
         //mGridview = (GridView) findViewById(R.id.gridview);
         mGridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
-
-
 
                 Cursor cursor = (Cursor) mGridview.getItemAtPosition(position);
                 if (cursor != null) {
@@ -165,17 +280,8 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
                     Bundle bundle = new Bundle();
                     bundle.putString("title", cursor.getString(COL_MOVIE_TITLE));
-
-
-
-
-
                     mCallback.onArticleSelected(bundle);
                 }
-
-
-
-
 
                 Bundle bundle = new Bundle();
                 bundle.putString("title", finalMovieData.get(position).title);
@@ -185,11 +291,8 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                 bundle.putString("releasedate", finalMovieData.get(position).releaseDate);
 
                 mCallback.onArticleSelected(bundle);
-
-
             }
         });*/
-
 
         // set default values, only if they have not been set before
         PreferenceManager.setDefaultValues(getActivity(), R.xml.pref_general, false);
@@ -212,23 +315,24 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
         if (pm2Db.exists()) {
 
-
             Log.v("GRIDFRAGMENT", "db found. load from db...");
-
             // load from cursor here?
 
-
-
         } else {
-
-
 
             FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity());
             fetchMoviesTask.execute();
 
             Log.v("GRIDFRAGMENT", "no db found. fetching...");
-
         }
+
+        mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), mUriPaths);
+        mGridview.setAdapter(mImageAdapter);
+        mImageAdapter.notifyDataSetChanged();
+
+        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+
+
     }
 
     @Override
@@ -309,7 +413,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             //Log.v("PREF", "USING DB...");
         }
         */
-
     }
 
 
@@ -568,11 +671,11 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
 
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
         // sort by popularity, ascending
         // TODO: switch to get sort order from preferences
-        String sortOrder = MovieEntry.COLUMN_POPULARITY + " ASC";
+        String sortOrder = MovieEntry.COLUMN_POPULARITY + " DESC";
 
         //Intent intent = getActivity().getIntent();
         //if (intent == null) {
@@ -594,12 +697,59 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
 
-        System.out.println("GRIDFRAGMENT - onLoadFinished");
+        //System.out.println("GRIDFRAGMENT - onLoadFinished");
 
+        /*
+            get movie data using cursor and put into movie objects and then arraylist
+
+
+
+         */
+
+
+        // create new array containing complete poster urls
+        //ArrayList<String> posterUrlsFinal = new ArrayList<String>();
+        String baseURL = "http://image.tmdb.org/t/p/";
+
+        String thumbSize = "w185";
+
+        String posterPath = null;
+
+        String finalURL = null;
+
+        mUriPaths = new ArrayList<String>();
+
+        // clear the default image list before adding
+        //mUriPaths.clear();
+
+        while (cursor.moveToNext()) {
+
+            posterPath = cursor.getString(COL_MOVIE_POSTER_PATH);
+            finalURL = baseURL + thumbSize + posterPath;
+            //posterUrlsFinal.add(finalURL);
+
+            //System.out.println("finalURL = " + finalURL);
+
+            mUriPaths.add(finalURL);
+
+        }
+
+        mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), mUriPaths);
+        mGridview.setAdapter(mImageAdapter);
+        mImageAdapter.notifyDataSetChanged();
+
+
+        //int cursorCount = cursor.getCount();
+
+        //System.out.println("GRIDFRAGMENT - cursorCount = " + cursorCount);
+
+        //System.out.println("GRIDFRAGMENT - onLoadFinished");
+
+        /*
         posterUrls.clear();
 
         // create new array containing complete poster urls
-        ArrayList<String> posterUrlsFinal = new ArrayList<String>();
+        //ArrayList<String> posterUrlsFinal = new ArrayList<String>();
 
         String baseURL = "http://image.tmdb.org/t/p/";
 
@@ -614,7 +764,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         uriPaths.clear();
 
 
-
         while (cursor.moveToNext()) {
 
             posterPath = cursor.getString(COL_MOVIE_POSTER_PATH);
@@ -625,9 +774,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
             uriPaths.add(finalURL);
 
-        }
-
-        // TODO: close cursor
+        }*/
 
 
         /*
@@ -665,26 +812,29 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             uriPaths.add(posterUrlsFinal.get(i));
         }*/
 
-        mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), uriPaths);
-        mGridview.setAdapter(mImageAdapter);
-        mImageAdapter.notifyDataSetChanged();
+        //mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), cursor);
+        //mGridview.setAdapter(mImageAdapter);
+        //mImageAdapter.notifyDataSetChanged();
 
-            //update imageadapter herer?
+        //update imageadapter herer?
 
 
-
+        //fromCursorToArrayListString(cursor);
 
 
         //mImageAdapter.swapCursor(cursor);
+
+
+
+
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
+
+        // clear old data here
         //mImageAdapter.swapCursor(null);
 
-        // clear old data here??
     }
-
-
 
 }

@@ -41,9 +41,6 @@ public class ImageAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        System.out.println("ImageAdapter - getView");
-
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams
                 .FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
 
@@ -59,7 +56,6 @@ public class ImageAdapter extends BaseAdapter {
 
         Picasso.with(mContext)
                 .load(mImageUrls.get(position))
-                .centerCrop()
                 .resize(600, 900)
                 .into(imageView);
 
