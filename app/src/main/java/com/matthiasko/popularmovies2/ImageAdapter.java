@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * The ImageAdapter used for the GridView.
@@ -18,17 +18,27 @@ import java.util.List;
 
 public class ImageAdapter extends BaseAdapter {
 
-    private List<String> mImageUrls;
+    /*
+        we have to change mTmdbMovieList to an arraylist of TmdbMovie objects
+        and extract the poster information from there
+        eventually we will have to extract a stored image
+
+
+     */
+
+    //private List<String> mTmdbMovieList;
+
+    private ArrayList<TmdbMovie> mTmdbMovieList;
 
     private Context mContext;
 
-    public ImageAdapter(Context context, List<String> imageUrls) {
+    public ImageAdapter(Context context, ArrayList<TmdbMovie> imageUrls) {
         this.mContext = context;
-        this.mImageUrls = imageUrls;
+        this.mTmdbMovieList = imageUrls;
     }
 
     public int getCount() {
-        return mImageUrls.size();
+        return mTmdbMovieList.size();
     }
 
     public Object getItem(int position) {
@@ -54,8 +64,29 @@ public class ImageAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
 
+        /*
+            process posterpath extracted from TmdbMovie object here...
+
+         */
+
+        String baseURL = "http://image.tmdb.org/t/p/";
+
+        String thumbSize = "w185";
+
+        String posterPath = null;
+
+
+
+        String finalURL = null;
+
+        posterPath = mTmdbMovieList.get(position).posterPath;
+        finalURL = baseURL + thumbSize + posterPath;
+
+
+
+
         Picasso.with(mContext)
-                .load(mImageUrls.get(position))
+                .load(finalURL)
                 .resize(600, 900)
                 .into(imageView);
 

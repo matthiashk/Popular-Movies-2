@@ -79,7 +79,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
                     && gridPane.getVisibility() == View.VISIBLE) {
 
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
+                fragmentTransaction.setCustomAnimations(R.anim.exit_slide_in, R.anim.exit_slide_out);
                 fragmentTransaction.show(gridFragment);
                 fragmentTransaction.hide(detailFragment);
                 fragmentTransaction.commit();
@@ -98,7 +98,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         // The user selected a movie from the GridFragment
 
         /*
-        * we should shoe the detail fragment here?
+        * we should show the detail fragment here?
         *
         *
         * */
@@ -115,7 +115,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
 
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-            fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+            fragmentTransaction.setCustomAnimations(R.anim.slide_in, R.anim.slide_out);
             fragmentTransaction.show(detailFragment);
             fragmentTransaction.hide(gridFragment);
             fragmentTransaction.commit();
@@ -154,7 +154,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
                 && gridPane.getVisibility() == View.VISIBLE) {
 
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
+            fragmentTransaction.setCustomAnimations(R.anim.exit_slide_in, R.anim.exit_slide_out);
             fragmentTransaction.show(gridFragment);
             fragmentTransaction.hide(detailFragment);
             fragmentTransaction.commit();

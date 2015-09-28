@@ -37,14 +37,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     public static final String PATH_MOVIE = "movie";
 
-
     public static final Uri CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
 
-
-    //public static View view;
-
-    private Bundle savedState = null;
+    //private Bundle savedState = null;
 
     private static final String[] PROJECTION = new String[] { "_id", "title" };
 
@@ -61,7 +57,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             MovieEntry.COLUMN_VOTE_COUNT,
             MovieEntry.COLUMN_MOVIE_ID,
     };
-
 
     public static final int COL_MOVIE_ID = 0;
     public static final int COL_MOVIE_TITLE = 1;
@@ -95,8 +90,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_main, menu);
         super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_main, menu);
     }
 
     @Override
@@ -115,6 +110,50 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
 
+        if (savedInstanceState == null) {
+
+            //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
+        } else {
+
+            TmdbMovie movie = savedInstanceState.getParcelable("movie");
+
+            ((TextView) view.findViewById(R.id.details_movie_title))
+                    .setText(movie.title);
+
+            ((TextView) view.findViewById(R.id.details_plot))
+                    .setText(movie.plot);
+
+            // allow user to scroll the view containing the plot synopsis
+            ((TextView) view.findViewById(R.id.details_plot))
+                    .setMovementMethod(new ScrollingMovementMethod());
+
+            // format the user rating, add '/10'
+            String formattedUserRating = String.format("%.1f", movie.userRating) + "/10";
+
+            ((TextView) view.findViewById(R.id.details_user_rating))
+                    .setText(formattedUserRating);
+
+            // extract the year from the release date string
+            //String movieYear = releaseDate.substring(0, 4);
+            ((TextView) view.findViewById(R.id.details_release_date))
+                    .setText(movie.releaseDate);
+
+            // showing thumbnail poster
+            // construct url for the full posterpath
+            String baseURL = "http://image.tmdb.org/t/p/";
+            String thumbSize = "w185";
+            String posterURL = null;
+            posterURL = baseURL + thumbSize + movie.posterPath;
+
+            ImageView imageView = ((ImageView) view.findViewById(R.id.details_imageview));
+
+            Picasso.with(getActivity())
+                    .load(posterURL)
+                            //.resize(600, 900)
+                    .into(imageView);
+
+
+        }
 
         //sampleText = (TextView)view.findViewById(R.id.omegaText);
 
@@ -138,13 +177,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         *
         * */
 
-
-
         //((ActionBarActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         return view;
     }
-
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -193,13 +229,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-
-        // this was crashing...had to fix oncreateloader
-        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
+
+        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
     }
-
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -258,16 +291,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             Picasso.with(getActivity())
                     .load(posterURL)
-                            //.placeholder(R.drawable.weather)
-                    .centerCrop()
                     .resize(600, 900)
                     .into(imageView);
-
-
         }*/
     }
 
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    /* called when item is selected from the gridview from mainactivity */
     public void updateArticleView(Bundle bundle) {
+
+
+
+
 
         movieTitle = bundle.getString("title");
         posterPath = bundle.getString("posterpath");
@@ -297,6 +336,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         ((TextView) getView().findViewById(R.id.details_release_date))
                 .setText(releaseDate);
 
+        // showing thumbnail poster
         // construct url for the full posterpath
         String baseURL = "http://image.tmdb.org/t/p/";
         String thumbSize = "w185";
@@ -307,9 +347,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         Picasso.with(getActivity())
                 .load(posterURL)
-                        //.placeholder(R.drawable.weather)
-                .centerCrop()
-                .resize(600, 900)
+                //.resize(600, 900)
                 .into(imageView);
     }
 
@@ -319,6 +357,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         //savedState = saveState();
         //sampleText = null;
     }
+
+
 
     /*
     private Bundle saveState() { // called either from onDestroyView() or onSaveInstanceState()
@@ -332,15 +372,29 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        //outState.putBundle("myBundle", (savedState != null) ? savedState : saveState());
+        /*
+            put movie details in bundle and reload in onactivitycreated
 
+         */
+
+        TmdbMovie movie = new TmdbMovie();
+
+        movie.setTitle(movieTitle);
+        //movie.setId();
+        movie.setPosterPath(posterPath);
+        movie.setPlot(plot);
+        movie.setUserRating(userRating);
+        movie.setReleaseDate(releaseDate);
+        //movie.setVoteCount();
+        //movie.setMovieId();
+
+        outState.putParcelable("movie", movie);
     }
 
-    public void updateDetails(Bundle landscapeBundle) {
+    public void updateDetails(Bundle landscapeBundle) { // TODO: needed?
         Bundle bundle = landscapeBundle;
         if (bundle != null) {
             //System.out.println("updateDetails - xxxmovieTitle:" + movieTitle);
-
             movieTitle = bundle.getString("title");
             posterPath = bundle.getString("posterpath");
             plot = bundle.getString("plot");
@@ -351,10 +405,5 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // need to call refresh here?
         //System.out.println("xmovieTitle:" + movieTitle);
         //landscapeBundle = bundle;
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
     }
 }

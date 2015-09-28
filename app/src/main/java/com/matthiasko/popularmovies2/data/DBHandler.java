@@ -32,7 +32,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_RELEASE_DATE + " text not null," +
                 MovieEntry.COLUMN_POPULARITY + " integer," +
                 MovieEntry.COLUMN_VOTE_COUNT + " integer," +
-                MovieEntry.COLUMN_MOVIE_ID + " integer" +
+                MovieEntry.COLUMN_MOVIE_ID + " integer unique" +
                 ");";
 
         database.execSQL(DATABASE_CREATE);
