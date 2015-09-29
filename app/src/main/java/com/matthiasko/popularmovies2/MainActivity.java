@@ -17,8 +17,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //System.out.println("MainActivity - onCreate");
-
         // hide the detail fragment in portrait mode
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
@@ -29,16 +27,12 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.hide(detailFragment);
             fragmentTransaction.commit();
-
-            //System.out.println("PORTRAIT DETECTED - DETAIL FRAGMENT HIDDEN");
         }
-
 
         // dont show landscape mode on phones
         if(getResources().getBoolean(R.bool.portrait_only)){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
-
     }
 
     @Override
@@ -87,22 +81,12 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
                 // hide back button
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             }
-
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     public void onArticleSelected(Bundle bundle) {
-        // The user selected a movie from the GridFragment
-
-        /*
-        * we should show the detail fragment here?
-        *
-        *
-        * */
-
 
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
@@ -124,14 +108,9 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Capture the detail fragment from the activity layout
-
         if (detailFragment != null) {
+            // send bundle from GridFragment to our DetailFragment
             detailFragment.updateArticleView(bundle);
-
-        } else {
-
-            // ...
 
         }
     }
@@ -165,5 +144,4 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
             super.onBackPressed();
         }
     }
-
 }

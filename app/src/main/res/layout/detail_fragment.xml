@@ -4,95 +4,85 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView android:text="@string/hello_world" android:layout_width="match_parent"
+    <TextView
+        android:text="@string/textview_title"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/details_movie_title"
-        android:height="40dp"
-        android:width="500dp"
         android:textSize="28dp"
-        android:layout_below="@+id/details_user_rating"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="208dp"
         android:paddingLeft="5dp"
-        android:paddingTop="5dp" />
+        android:paddingTop="5dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="#000000"
+        android:textColor="#ffffff" />
 
     <ImageView
-        android:layout_width="200dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/details_imageview"
+        android:paddingTop="10dp"
+        android:layout_weight="1.66"
+        android:layout_below="@+id/details_movie_title"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="false"
-        android:layout_alignParentTop="true"
-        android:maxHeight="50dp"
-        android:minHeight="50dp"
-        android:maxWidth="175dp"
-        android:minWidth="175dp"
-        android:layout_above="@+id/details_plot"
-        android:layout_weight="1.66" />
+        android:layout_marginLeft="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Plot Synopsis"
         android:id="@+id/details_plot"
-        android:layout_alignTop="@+id/details_movie_title"
+        android:textSize="15dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_below="@+id/details_imageview"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="45dp"
-        android:height="300dp"
-        android:width="500dp"
-        android:textSize="15dp" />
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Year"
         android:id="@+id/details_release_date"
-        android:height="20dp"
-        android:width="125dp"
         android:textSize="15dp"
         android:paddingLeft="5dp"
+        android:paddingTop="5dp"
         android:layout_below="@+id/details_release_date_label"
-        android:layout_toRightOf="@+id/details_imageview"
-        android:layout_toEndOf="@+id/details_imageview" />
+        android:layout_toRightOf="@+id/details_imageview" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="User Rating"
         android:id="@+id/details_user_rating"
-        android:height="25dp"
-        android:width="100dp"
         android:paddingLeft="5dp"
+        android:paddingTop="5dp"
         android:layout_below="@+id/details_user_rating_label"
-        android:layout_toRightOf="@+id/details_imageview"
-        android:layout_toEndOf="@+id/details_imageview"
-        android:paddingTop="5dp" />
+        android:layout_toRightOf="@+id/details_imageview" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Release Date:"
         android:id="@+id/details_release_date_label"
-        android:height="20dp"
-        android:width="100dp"
-        android:layout_alignParentTop="true"
+        android:paddingTop="10dp"
+        android:paddingLeft="5dp"
+        android:layout_alignTop="@+id/details_imageview"
         android:layout_toRightOf="@+id/details_imageview"
-        android:layout_toEndOf="@+id/details_imageview"
-        android:paddingLeft="5dp" />
+        android:layout_toEndOf="@+id/details_imageview" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="User Rating:"
         android:id="@+id/details_user_rating_label"
-        android:layout_below="@+id/details_release_date"
-        android:layout_toRightOf="@+id/details_imageview"
-        android:layout_toEndOf="@+id/details_imageview"
-        android:width="100dp"
-        android:height="25dp"
         android:paddingLeft="5dp"
-        android:paddingTop="5dp" />
+        android:paddingTop="5dp"
+        android:layout_below="@+id/details_release_date"
+        android:layout_toRightOf="@+id/details_imageview" />
 
 </RelativeLayout>

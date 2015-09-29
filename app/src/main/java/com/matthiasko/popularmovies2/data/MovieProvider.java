@@ -13,11 +13,12 @@ import android.net.Uri;
 public class MovieProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
-    DBHandler handler;
+    private DBHandler handler;
 
-    private static final String AUTHORITY = "com.matthiasko.popularmovies2";
+    //private static final String AUTHORITY = "com.matthiasko.popularmovies2";
 
     static final int MOVIE = 100;
+    static final int MOVIE_ID = 101;
 
     // add the database
     @Override
@@ -28,17 +29,13 @@ public class MovieProvider extends ContentProvider {
     }
 
     static UriMatcher buildUriMatcher() {
-        // I know what you're thinking.  Why create a UriMatcher when you can use regular
-        // expressions instead?  Because you're not crazy, that's why.
 
-        // All paths added to the UriMatcher have a corresponding code to return when a match is
-        // found.  The code passed into the constructor represents the code to return for the root
-        // URI.  It's common to use NO_MATCH as the code for this case.
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
         // For each type of URI you want to add, create a corresponding code.
         matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/#", MOVIE_ID);
 
         return matcher;
     }
@@ -46,16 +43,41 @@ public class MovieProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
 
+        // this isnt called...
+        // this may be called by external apps
+
         // Use the Uri Matcher to determine what kind of URI this is.
         final int match = sUriMatcher.match(uri);
 
         switch (match) {
-            // Student: Uncomment and fill out these two cases
+
             case MOVIE:
                 return MovieContract.MovieEntry.CONTENT_TYPE;
+            case MOVIE_ID:
+                return MovieContract.MovieEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
+    }
+
+    private Cursor getMovie(
+            Uri uri, String[] projection, String sortOrder) {
+
+        // get the movie id from the uri so we can use in the selection parameter of the query
+        String lastPath = uri.getLastPathSegment();
+
+        SQLiteDatabase db = handler.getReadableDatabase();
+
+        //int count = db.rawQuery("SELECT _id FROM movies", null).getCount();
+        //System.out.println("count = " + count);
+
+        return db.query(MovieContract.MovieEntry.TABLE_NAME,
+                projection,
+                "_id= " + lastPath,
+                null,
+                null,
+                null,
+                sortOrder);
     }
 
 
@@ -64,11 +86,12 @@ public class MovieProvider extends ContentProvider {
                         String sortOrder) {
         // Here's the switch statement that, given a URI, will determine what kind of request it is,
         // and query the database accordingly.
+
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
-            // "weather/*/*"
 
             case MOVIE: {
+                System.out.println("query MOVIE");
                 retCursor = handler.getReadableDatabase().query(
                         MovieContract.MovieEntry.TABLE_NAME,
                         projection,
@@ -78,6 +101,11 @@ public class MovieProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
+                break;
+            }
+            case MOVIE_ID: {
+                System.out.println("query MOVIE_ID");
+                retCursor = getMovie(uri, projection, sortOrder);
                 break;
             }
 
@@ -181,5 +209,4 @@ public class MovieProvider extends ContentProvider {
                 return super.bulkInsert(uri, values);
         }
     }
-
 }
