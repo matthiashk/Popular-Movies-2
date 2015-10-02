@@ -70,7 +70,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             MovieEntry.COLUMN_MOVIE_ID,
     };
 
-    public static final int COL_MOVIE_ID = 0;
+    public static final int COL_ID = 0;
     public static final int COL_MOVIE_TITLE = 1;
     public static final int COL_MOVIE_POSTER_PATH = 2;
     public static final int COL_MOVIE_PLOT = 3;
@@ -78,6 +78,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     public static final int COL_MOVIE_RELEASE_DATE = 5;
     public static final int COL_MOVIE_POPULARITY = 6;
     public static final int COL_MOVIE_VOTE_COUNT = 7;
+    public static final int COL_MOVIE_ID = 8;
 
     public GridFragment() { }
 
@@ -168,6 +169,9 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        final DetailFragment detailFragment = (DetailFragment) getFragmentManager()
+                .findFragmentById(R.id.detail_fragment);
+
         mGridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
@@ -175,8 +179,20 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             Cursor cursor = (Cursor) mGridview.getItemAtPosition(position);
             if (cursor != null) {
                 Bundle bundle = new Bundle();
-                bundle.putString("movieURI", MovieContract.MovieEntry.buildMovieUri(cursor.getInt(COL_MOVIE_ID)).toString());
+                bundle.putString("movieURI", MovieContract.MovieEntry.buildMovieUri(cursor.getInt(COL_ID)).toString());
                 mCallback.onArticleSelected(bundle);
+
+
+
+                // call fetchextrastask with movie id as parameter
+
+                String movieIDString = String.valueOf(cursor.getInt(COL_MOVIE_ID));
+
+
+                FetchExtrasTask extrasTask = new FetchExtrasTask(getActivity(), detailFragment);
+
+                extrasTask.execute(movieIDString);
+
             }
             }
         });
@@ -281,7 +297,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         }
     }
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, Void> {
+    public class FetchMoviesTask extends AsyncTask<String, Void, Void> { // TODO: put in seperate file
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
         private final Context mContext;
@@ -305,6 +321,10 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
             final String TMDB_MOVIE_ID = "id";
 
+            //String[] trailers = new String[10]; // TODO: remove magic #
+
+            //ArrayList<String> trailers = new ArrayList<String>();
+
             try {
 
                 JSONObject forecastJson = new JSONObject(forecastJsonStr);
@@ -326,6 +346,23 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                     int popularity = oneObject.getInt(TMDB_POPULARITY);
                     int voteCount = oneObject.getInt(TMDB_VOTE_COUNT);
                     int movieID = oneObject.getInt(TMDB_MOVIE_ID);
+
+                    /*JSONArray trailers = oneObject.getJSONArray("trailers");
+                    JSONArray youtubeTrailers = trailers.getJSONArray(1);
+                    String ytName = youtubeTrailers.getString(0);
+                    String ytSize = youtubeTrailers.getString(1);
+                    String ytSource = youtubeTrailers.getString(2);
+                    String ytType = youtubeTrailers.getString(3);
+
+                    System.out.println("ytName = " + ytName);
+                    System.out.println("ytSize = " + ytSize);
+                    System.out.println("ytSource = " + ytSource);
+                    System.out.println("ytType = " + ytType);
+*/
+
+
+
+
 
                     ContentValues movieValues = new ContentValues();
 
@@ -379,6 +416,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                 final String SORT_BY_PARAM = "sort_by";
                 final String API_KEY_PARAM = "api_key";
                 final String VOTE_COUNT = "vote_count.gte";
+                //final String APPEND_TO_RESPONSE = "append_to_response";
 
                 // TODO: REMOVE api key before submitting project!!!
                 Uri builtUri = Uri.parse(MOVIE_BASE_URL)
@@ -386,6 +424,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                         .appendQueryParameter(SORT_BY_PARAM, sortOrder)
                         .appendQueryParameter(VOTE_COUNT, "10")
                         .appendQueryParameter(API_KEY_PARAM, "aa336466223f0deecbe36bf1aafd76d3")
+                        //.appendQueryParameter(APPEND_TO_RESPONSE, "trailers,reviews")
                         .build();
 
                 URL url = new URL(builtUri.toString());

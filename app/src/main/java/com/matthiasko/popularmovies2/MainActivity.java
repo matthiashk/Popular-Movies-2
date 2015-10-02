@@ -15,6 +15,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         // hide the detail fragment in portrait mode
@@ -64,6 +65,19 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         if (id == android.R.id.home) {
 
             View gridPane = findViewById(R.id.detail_fragment);
+
+            /*
+            // check fragment visibility
+            if (gridPane.getVisibility() == View.VISIBLE) {
+
+                //System.out.println("DETAIL FRAGMENT IS VISIBLE");
+
+            }
+
+            if (detailFragment == null) {
+
+                //System.out.println("detailFragment is NULL");
+            }*/
 
             // only execute if we are in portrait AND the gridPane is visible
             // we have to mirror this action for the back button on the action bar...

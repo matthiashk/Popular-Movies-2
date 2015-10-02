@@ -91,7 +91,7 @@ public class MovieProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
 
             case MOVIE: {
-                System.out.println("query MOVIE");
+                //System.out.println("query MOVIE");
                 retCursor = handler.getReadableDatabase().query(
                         MovieContract.MovieEntry.TABLE_NAME,
                         projection,
@@ -104,7 +104,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case MOVIE_ID: {
-                System.out.println("query MOVIE_ID");
+                //System.out.println("query MOVIE_ID");
                 retCursor = getMovie(uri, projection, sortOrder);
                 break;
             }
