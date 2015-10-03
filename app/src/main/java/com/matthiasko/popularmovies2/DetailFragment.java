@@ -8,6 +8,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.text.method.ScrollingMovementMethod;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -24,7 +26,6 @@ import android.widget.TextView;
 import com.matthiasko.popularmovies2.data.MovieContract.MovieEntry;
 import com.squareup.picasso.Picasso;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,19 +72,30 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private Wrapper mWrapper;
     private List<Button> mButtonList;
     private List<TextView> mTextViewList;
+    private String mYouTubeUrl;
+
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setHasOptionsMenu(true);
-
+        setHasOptionsMenu(true);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_main, menu);
+        inflater.inflate(R.menu.menu_detail, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+
+        // Fetch and store ShareActionProvider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -92,8 +104,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 //System.out.println("HOME PRESSED");
                 //getFragmentManager().popBackStack();
                 return true;
+            case R.id.menu_item_share:
+
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private Intent createShareIntent() {
+
+        //System.out.println("mYouTubeUrl = " + mYouTubeUrl);
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT,
+                mYouTubeUrl);
+        return shareIntent;
     }
 
     @Override
@@ -404,6 +430,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             .buildUpon()
                             .appendQueryParameter(QUERY_PARAM, mWrapper.ytObjectArrayList.get(i).getYtSource())
                             .build();
+
+                    // get first youtube link only
+                    if (i == 0) {
+
+                        mYouTubeUrl = builtUri.toString();
+
+                        mShareActionProvider.setShareIntent(createShareIntent());
+
+                    }
 
                     //System.out.println("builturi = " + builtUri.toString());
 
