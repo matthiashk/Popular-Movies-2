@@ -16,12 +16,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by matthiasko on 9/29/15.
  */
-public class FetchExtrasTask extends AsyncTask<String, ArrayList<ReviewObject>, ArrayList<YTObject>> {
+public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
 
     private FetchExtrasResponse fetchExtrasResponse;
 
@@ -39,7 +38,7 @@ public class FetchExtrasTask extends AsyncTask<String, ArrayList<ReviewObject>, 
     }
 
     // send result to onpostexecute
-    private ArrayList<YTObject> getMovieDataFromJson(String extrasJsonStr)
+    private Wrapper getMovieDataFromJson(String extrasJsonStr)
             throws JSONException {
 
         // the strings should match the api strings
@@ -57,6 +56,8 @@ public class FetchExtrasTask extends AsyncTask<String, ArrayList<ReviewObject>, 
         ArrayList<YTObject> result = new ArrayList<YTObject>();
 
         ArrayList<ReviewObject> reviewsArray = new ArrayList<ReviewObject>();
+
+        Wrapper wrapper = new Wrapper();
 
         try {
 
@@ -109,6 +110,9 @@ public class FetchExtrasTask extends AsyncTask<String, ArrayList<ReviewObject>, 
 
 
 
+            wrapper.ytObjectArrayList = result;
+            wrapper.reviewObjectArrayList = reviewsArray;
+
 
 
 
@@ -142,11 +146,11 @@ public class FetchExtrasTask extends AsyncTask<String, ArrayList<ReviewObject>, 
             e.printStackTrace();
         }
 
-        return result;
+        return wrapper;
     }
 
     @Override
-    protected ArrayList<YTObject> doInBackground(String... params) {
+    protected Wrapper doInBackground(String... params) {
 
             /* Create api url request and send results to json parser. */
 
@@ -251,11 +255,14 @@ public class FetchExtrasTask extends AsyncTask<String, ArrayList<ReviewObject>, 
 
 
     @Override
-    protected void onPostExecute(ArrayList<YTObject> result) {
-        super.onPostExecute(result, result);
+    protected void onPostExecute(Wrapper wrapper) {
+        super.onPostExecute(wrapper);
+        /*
+        for(int i=0; i < wrapper.ytObjectArrayList.size(); i++){
+            System.out.println(wrapper.ytObjectArrayList.get(i).getYtName());
+        }
+        */
 
-        fetchExtrasResponse.onSuccess(result, reviews);
-
+        fetchExtrasResponse.onSuccess(wrapper);
     }
-
 }

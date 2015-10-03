@@ -66,8 +66,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static final int COL_MOVIE_POPULARITY = 6;
     public static final int COL_MOVIE_VOTE_COUNT = 7;
 
-    private ArrayList<YTObject> mYoutubeArrayList;
+    //private ArrayList<YTObject> mYoutubeArrayList;
+
+    private Wrapper mWrapper;
     private List<Button> mButtonList;
+    private List<TextView> mTextViewList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -268,7 +271,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
 
             // create trailer links here
-            if (mYoutubeArrayList != null) {
+            if (mWrapper != null) {
 
                 //System.out.println("creating links ...");
 
@@ -281,7 +284,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     RelativeLayout relativeLayout = (RelativeLayout) getView().findViewById(R.id.details_layout);
 
-                    //System.out.println("removing VIEWS");
+                    //System.out.println("removing BUTTON VIEWS");
 
                     // remove buttons from view
                     for (int i=0; i < mButtonList.size(); i++) {
@@ -297,6 +300,32 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     //ready = "OK";
                     mButtonList.clear();
                 }
+
+                if (mTextViewList == null) {
+
+                    //System.out.println("mButtonList is NULL");
+
+                } else {
+
+                    RelativeLayout relativeLayout = (RelativeLayout) getView().findViewById(R.id.details_layout);
+
+                    //System.out.println("removing BUTTON VIEWS");
+
+                    // remove buttons from view
+                    for (int i=0; i < mTextViewList.size(); i++) {
+
+                        relativeLayout.removeView(mTextViewList.get(i));
+
+                        //mButtonList.get(i).findViewById(mButtonList.get(i).getId()).setVisibility(View.GONE);
+
+                    }
+                    //System.out.println("mButtonList size = " + mButtonList.size());
+
+
+                    //ready = "OK";
+                    mTextViewList.clear();
+                }
+
 
                 View view = getView(); //returns base view of the fragment
                 if ( view == null)
@@ -343,17 +372,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 // make buttons based on how many youtube links there are
                 mButtonList = new ArrayList<Button>();
-                for (int i = 0; i < mYoutubeArrayList.size(); i++) {
+                for (int i = 0; i < mWrapper.ytObjectArrayList.size(); i++) {
                     mButtonList.add(new Button(getActivity()));
                 }
 
 
-                int z = 1;
+                int z = 1; // use this to set button ids
 
                 //System.out.println("mYoutubeArrayList size = " + mYoutubeArrayList.size());
 
-                for (int i=0; i < mYoutubeArrayList.size(); i++) {
+                int lastButtonId = mWrapper.ytObjectArrayList.size();
 
+                for (int i=0; i < mWrapper.ytObjectArrayList.size(); i++) {
 
                     mButtonList.get(i).setLayoutParams(new RelativeLayout.LayoutParams(
                             ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -363,24 +393,21 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     mButtonList.get(i).setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
 
-                    mButtonList.get(i).setText(mYoutubeArrayList.get(i).getYtName());
+                    mButtonList.get(i).setText(mWrapper.ytObjectArrayList.get(i).getYtName());
 
                     // sample youtube url https://www.youtube.com/watch?v=JAUoeqvedMo
 
                     final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?";
                     final String QUERY_PARAM = "v";
 
-
                     final Uri builtUri = Uri.parse(YOUTUBE_BASE_URL)
                             .buildUpon()
-                            .appendQueryParameter(QUERY_PARAM, mYoutubeArrayList.get(i).getYtSource())
+                            .appendQueryParameter(QUERY_PARAM, mWrapper.ytObjectArrayList.get(i).getYtSource())
                             .build();
 
                     //System.out.println("builturi = " + builtUri.toString());
 
                     //URL url = new URL(builtUri.toString());
-
-
 
                     mButtonList.get(i).setOnClickListener(new View.OnClickListener() {
                         public void onClick(View v) {
@@ -394,9 +421,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             RelativeLayout.LayoutParams.WRAP_CONTENT,
                             RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-                        if(i==0)
-
-                        {
+                        if(i==0) {
 
                             layoutParams.addRule(RelativeLayout.BELOW, R.id.details_plot);
 
@@ -408,24 +433,135 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         else
 
                         {
-
-
                             //System.out.println("button ID = " + mButtonList.get(i).getId());
-
                             layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(i).getId() - 1);
 
                             mButtonList.get(i).setLayoutParams(layoutParams);
 
                             relativeLayout.addView(mButtonList.get(i));
+
+                            //System.out.println("creating BUTTON VIEWS");
                         }
-
-
                         z++;
+
+
 
                     }
 
 
-                            //mYoutubeArrayList.clear();
+                // this will match if no reviews
+                if (mWrapper.reviewObjectArrayList.size() == 0) {
+
+                    //System.out.println("NO REVIEWS...");
+                } else { // process reviews here
+
+
+
+/*
+                    TextView testTextView = new TextView(getActivity());
+
+                    testTextView.setLayoutParams(new RelativeLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                    testTextView.setId(a);
+
+                    testTextView.get(i).setBackgroundColor(getResources().getColor(android.R.color.holo_blue_light));
+
+                    testTextView.get(i).setText(mWrapper.reviewObjectArrayList.get(i).getRContent());
+
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                            RelativeLayout.LayoutParams.WRAP_CONTENT,
+                            RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+                    layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(lastButtonId-1).getId());
+
+                    testTextView.get(i).setLayoutParams(layoutParams);
+
+                    relativeLayout.addView(testTextView.get(i));
+
+                    */
+
+
+                    /*
+                    int buttonLocation[] = new int[2];
+
+                    mButtonList.get(lastButtonId-1).getLocationOnScreen(buttonLocation);
+
+                    System.out.println("buttonLocation = " + buttonLocation[0] + " " + buttonLocation[1]);
+
+
+                    for (int i = 0; i < mButtonList.size(); i++) {
+
+                        System.out.println("mButton ids = " + mButtonList.get(i).getId());
+
+                    }
+
+
+
+                    */
+
+                    // System.out.println("mButtonList size= " + mButtonList.size());
+
+                    //System.out.println("mButtonId = " + mButtonList.get(lastButtonId-1).getId());
+
+                    //mButtonList.get(lastButtonId-1).getId()
+
+
+
+
+                    // setup textviews depending on how many reviews there are
+                    mTextViewList = new ArrayList<TextView>();
+                    for (int i = 0; i < mWrapper.reviewObjectArrayList.size(); i++) {
+                        mTextViewList.add(new TextView(getActivity()));
+                    }
+
+                    int a = 1000; // use this to set textview ids ... ids must be unique!
+                    for (int i=0; i < mWrapper.reviewObjectArrayList.size(); i++) {
+
+                        mTextViewList.get(i).setLayoutParams(new RelativeLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                        mTextViewList.get(i).setId(a);
+
+                        mTextViewList.get(i).setBackgroundColor(getResources().getColor(android.R.color.holo_blue_light));
+
+                        mTextViewList.get(i).setText(mWrapper.reviewObjectArrayList.get(i).getRContent());
+
+
+                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+                        if(i==0) {
+
+                            layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(lastButtonId-1).getId());
+
+                            //layoutParams.leftMargin = 0;
+                            //layoutParams.topMargin = 600;
+
+                            mTextViewList.get(i).setLayoutParams(layoutParams);
+
+                            relativeLayout.addView(mTextViewList.get(i));
+                        }
+
+                        else
+
+                        {
+                            //System.out.println("button ID = " + mButtonList.get(i).getId());
+                            layoutParams.addRule(RelativeLayout.BELOW, mTextViewList.get(i).getId() - 1);
+
+                            mTextViewList.get(i).setLayoutParams(layoutParams);
+
+                            relativeLayout.addView(mTextViewList.get(i));
+                        }
+                        a++; // increment our textview id
+
+
+                    }
+                }
+
 
                 }
         }
@@ -512,7 +648,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     // get result from fetchextrastask
     @Override
-    public void onSuccess(ArrayList<YTObject> result) {
+    public void onSuccess(Wrapper result) {
 
         /*
             the old button views dont get removed
@@ -526,7 +662,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
 
 
-        mYoutubeArrayList = result;
+
+
+        mWrapper = result;
 
         getLoaderManager().restartLoader(X_DETAIL_LOADER, null, this);
 
