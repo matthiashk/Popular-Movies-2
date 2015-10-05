@@ -180,12 +180,6 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
         try {
             final String MOVIE_BASE_URL =
                     "http://api.themoviedb.org/3/movie?";
-            // need movie id
-
-
-
-
-
             final String API_KEY_PARAM = "api_key";
             final String APPEND_TO_RESPONSE = "append_to_response";
 

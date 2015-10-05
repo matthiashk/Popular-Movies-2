@@ -182,17 +182,12 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                 bundle.putString("movieURI", MovieContract.MovieEntry.buildMovieUri(cursor.getInt(COL_ID)).toString());
                 mCallback.onArticleSelected(bundle);
 
-
-
                 // call fetchextrastask with movie id as parameter
-
                 String movieIDString = String.valueOf(cursor.getInt(COL_MOVIE_ID));
-
 
                 FetchExtrasTask extrasTask = new FetchExtrasTask(getActivity(), detailFragment);
 
                 extrasTask.execute(movieIDString);
-
             }
             }
         });
@@ -331,7 +326,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
                 JSONArray jArray = forecastJson.getJSONArray("results");
 
-                // Insert the new weather information into the database
+                // Insert the new information into the database
                 Vector<ContentValues> cVVector = new Vector<ContentValues>(jArray.length());
 
                 for (int i = 0; i < jArray.length(); i++) {
@@ -364,6 +359,9 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
 
 
+
+
+
                     ContentValues movieValues = new ContentValues();
 
                     movieValues.put(MovieEntry.COLUMN_MOVIE_ID, movieID);
@@ -374,6 +372,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                     movieValues.put(MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
                     movieValues.put(MovieEntry.COLUMN_POPULARITY, popularity);
                     movieValues.put(MovieEntry.COLUMN_VOTE_COUNT, voteCount);
+                    movieValues.put(MovieEntry.COLUMN_FAVORITE, 0);
 
                     cVVector.add(movieValues);
                 }

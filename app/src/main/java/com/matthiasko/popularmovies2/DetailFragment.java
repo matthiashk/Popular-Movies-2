@@ -22,10 +22,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.matthiasko.popularmovies2.data.MovieContract.MovieEntry;
 import com.squareup.picasso.Picasso;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +47,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     //public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
 
     private static final String[] PROJECTION = new String[] { "_id", "title", "poster_path", "plot",
-            "user_rating", "release_date", "popularity", "vote_count", "movie_id"};
+            "user_rating", "release_date", "popularity", "vote_count", "movie_id", "favorite", "image"};
 
     private static final int X_DETAIL_LOADER = 0;
 
@@ -58,7 +63,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             MovieEntry.COLUMN_MOVIE_ID,
     };
 
-    public static final int COL_MOVIE_ID = 0;
+    public static final int COL_ID = 0;
     public static final int COL_MOVIE_TITLE = 1;
     public static final int COL_MOVIE_POSTER_PATH = 2;
     public static final int COL_MOVIE_PLOT = 3;
@@ -66,6 +71,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static final int COL_MOVIE_RELEASE_DATE = 5;
     public static final int COL_MOVIE_POPULARITY = 6;
     public static final int COL_MOVIE_VOTE_COUNT = 7;
+    public static final int COL_MOVIE_ID = 8;
+    public static final int COL_FAVORITE = 9;
+    public static final int COL_IMAGE = 10;
+
 
     //private ArrayList<YTObject> mYoutubeArrayList;
 
@@ -75,6 +84,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private String mYouTubeUrl;
 
     private ShareActionProvider mShareActionProvider;
+
+    private String mPosterURL = null;
+    private String mMovieId = null;
+    private int mFavorite;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,10 +106,58 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 
-
     }
 
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
 
+        //System.out.println("onPrepareOptionsMenu mFavorite = " + mFavorite);
+
+        // check if the movie is a favorite and change menu icon if already favorited
+        // SHOULD THIS BE IN ONCREATEOPTIONSMENU? OR onOptionsItemSelected?
+        if (mFavorite == 0) {
+
+            //System.out.println("onPrepareOptionsMenu - mFavorite == 0");
+
+            MenuItem favoriteButton = menu.findItem(R.id.action_favorite);
+            favoriteButton.setIcon(R.drawable.ic_action_favorite);
+
+        } else if (mFavorite == 1) {
+
+            //System.out.println("onPrepareOptionsMenu - mFavorite == 1");
+
+            MenuItem favoriteButton = menu.findItem(R.id.action_favorite);
+            favoriteButton.setIcon(R.drawable.ic_action_favorite_true);
+        }
+
+
+
+
+
+
+        /*
+        if (logoImage == null) {
+
+            System.out.println("logoImage is NULL");
+
+
+
+        } else {
+
+            ImageView imageView = ((ImageView) getView().findViewById(R.id.testImageView));
+
+            imageView.setImageBitmap(BitmapFactory.decodeByteArray(logoImage, 0, 400));
+        }*/
+
+
+
+
+
+
+        //System.out.println("onPrepareOptionsMenu");
+        // change favorites icon here
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -104,10 +166,43 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 //System.out.println("HOME PRESSED");
                 //getFragmentManager().popBackStack();
                 return true;
-            case R.id.menu_item_share:
+            case R.id.action_favorite:
+                getActivity().invalidateOptionsMenu();
+
+                // CHANGE MFAVORITE TO 1 OR TOGGLE HERE
+
+                if (mFavorite == 0) {
+
+                    mFavorite = 1;
+
+                } else if (mFavorite == 1) {
+
+                    //mFavorite = 0;
+
+                }
+
+
+                // call fetchfavoritetask to get the image into the db
+                // and set favorite to true in db
+                if (mPosterURL != null) {
+
+                    FetchFavoriteTask favoriteTask = new FetchFavoriteTask(getActivity());
+
+                    favoriteTask.execute(mPosterURL, mMovieId);
+                }
+
+                String favoriteToast = "Movie has been added to Favorites.";
+
+                int duration = Toast.LENGTH_SHORT;
+
+                Toast toast = Toast.makeText(getActivity(), favoriteToast, duration);
+                toast.show();
+
+
+
 
                 return true;
-        }
+            }
         return super.onOptionsItemSelected(item);
     }
 
@@ -236,11 +331,27 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
+
+
         if (data != null && data.moveToFirst()) {
+
+            // get movie id
+            int movieId = data.getInt(COL_MOVIE_ID);
+
+            // convert to string so we can send to asynctask
+            mMovieId = String.valueOf(movieId);
+
+            mFavorite = data.getInt(COL_FAVORITE);
+
+            // update action bar favorite icon
+            getActivity().invalidateOptionsMenu();
+
+            //System.out.println("onLoadFinished - mFavorite = " + mFavorite);
 
             //System.out.println("GETVIEW IS NOT NULL");
 
             //int movieId = data.getInt(COL_MOVIE_ID);
+
             //System.out.println("DETAILFRAGMENT - onLoadFinished COL_MOVIE_ID = " + movieId);
 
             String lTitle = data.getString(COL_MOVIE_TITLE);
@@ -284,17 +395,52 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             // construct url for the full posterpath
             String baseURL = "http://image.tmdb.org/t/p/";
             String thumbSize = "w185";
-            String posterURL = null;
-            posterURL = baseURL + thumbSize + lPosterPath;
 
             ImageView imageView = ((ImageView) getView().findViewById(R.id.details_imageview));
 
-            Picasso.with(getActivity())
-                    .load(posterURL)
-                    .resize(600, 900)
-                    .into(imageView);
+            // check if the movie is a favorite before displaying image
+            if (mFavorite == 0) { // not a favorite, so fetch image from internet
 
+                mPosterURL = baseURL + thumbSize + lPosterPath;
 
+                Picasso.with(getActivity())
+                        .load(mPosterURL)
+                        .resize(600, 900)
+                        .into(imageView);
+
+            } else if (mFavorite == 1) { // is a favorite, so fetch image from db
+
+                //System.out.println("FETCHING FROM DB...");
+
+                byte[] imageFromDB = data.getBlob(COL_IMAGE);
+
+                // create file to save the image in
+                // use movie id as filename
+                File file = new File(getActivity().getFilesDir(), mMovieId);
+
+                // check if the file is already on disk
+                // if it is, we dont need to write to file, just load it
+                if (file.isFile()) {
+                } else {
+                    // save image from byte array to file
+                    try {
+
+                        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                        bos.write(imageFromDB);
+                        bos.flush();
+                        bos.close();
+
+                    } catch (IOException e) {
+
+                        e.printStackTrace();
+                    }
+                }
+
+                Picasso.with(getActivity())
+                        .load(file)
+                        .resize(600, 900)
+                        .into(imageView);
+            }
 
             // create trailer links here
             if (mWrapper != null) {

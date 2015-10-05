@@ -92,5 +92,13 @@
         android:layout_below="@+id/details_release_date"
         android:layout_toRightOf="@+id/details_imageview" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/testImageView"
+        android:layout_alignTop="@+id/details_user_rating_label"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>
 </ScrollView>

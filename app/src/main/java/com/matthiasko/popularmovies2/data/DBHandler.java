@@ -32,8 +32,12 @@ public class DBHandler extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_RELEASE_DATE + " text not null," +
                 MovieEntry.COLUMN_POPULARITY + " integer," +
                 MovieEntry.COLUMN_VOTE_COUNT + " integer," +
-                MovieEntry.COLUMN_MOVIE_ID + " integer unique" +
+                MovieEntry.COLUMN_MOVIE_ID + " integer unique," +
+                MovieEntry.COLUMN_FAVORITE + " integer," +
+                MovieEntry.COLUMN_IMAGE + " blob" +
                 ");";
+
+        // no sqlite bool type use integer 0 for false, 1 for true
 
         database.execSQL(DATABASE_CREATE);
     }
