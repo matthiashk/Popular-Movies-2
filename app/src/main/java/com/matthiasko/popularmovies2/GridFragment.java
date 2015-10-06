@@ -316,8 +316,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
             final String TMDB_MOVIE_ID = "id";
 
-            //String[] trailers = new String[10]; // TODO: remove magic #
-
             //ArrayList<String> trailers = new ArrayList<String>();
 
             try {
@@ -421,13 +419,15 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                 Uri builtUri = Uri.parse(MOVIE_BASE_URL)
                         .buildUpon()
                         .appendQueryParameter(SORT_BY_PARAM, sortOrder)
-                        .appendQueryParameter(VOTE_COUNT, "10")
+                        .appendQueryParameter(VOTE_COUNT, "75")
                         .appendQueryParameter(API_KEY_PARAM, "aa336466223f0deecbe36bf1aafd76d3")
                         //.appendQueryParameter(APPEND_TO_RESPONSE, "trailers,reviews")
                         .build();
 
                 URL url = new URL(builtUri.toString());
+
                 //System.out.println("builtUri = " + builtUri.toString());
+
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -536,21 +536,33 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         // 2 options are stored as popularity.desc and vote_count.desc
 
         String sortOrder = null;
+        String selection = null;
 
         if (mSortOrder.equals("popularity.desc")) {
 
             sortOrder = MovieEntry.COLUMN_POPULARITY + " DESC";
 
-        } else if (mSortOrder.equals("vote_count.desc")) {
+        } else if (mSortOrder.equals("vote_average.desc")) {
 
-            sortOrder = MovieEntry.COLUMN_VOTE_COUNT + " DESC";
+            sortOrder = MovieEntry.COLUMN_USER_RATING + " DESC";
+
+        } else if  (mSortOrder.equals("favorites")) {
+
+
+            // TODO: Create selection to filter db for only favorites
+
+            selection = MovieEntry.COLUMN_FAVORITE + "=" + 1;
+
         }
+
+
+
 
         return new CursorLoader(
                 getActivity(),
                 CONTENT_URI,
                 PROJECTION,
-                null,
+                selection,
                 null,
                 sortOrder
         );

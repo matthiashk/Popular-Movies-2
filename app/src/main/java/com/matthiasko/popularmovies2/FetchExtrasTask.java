@@ -115,6 +115,23 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
 
 
 
+            /*
+                we dont need wrapper class
+                just store in db instead as separate columns reviews & trailers
+                store arraylists as jsonOBJECT (a String object basically)
+
+                problem - we cant store arraylist of objects as jsonarray only strings
+
+                for trailers store url as one string separated by space
+
+                for reviews store author and content separated by space...
+
+
+
+
+             */
+
+
 
 
             /*  TODO: put trailers info in database??

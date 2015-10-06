@@ -32,7 +32,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_RELEASE_DATE + " text not null," +
                 MovieEntry.COLUMN_POPULARITY + " integer," +
                 MovieEntry.COLUMN_VOTE_COUNT + " integer," +
-                MovieEntry.COLUMN_MOVIE_ID + " integer unique," +
+                MovieEntry.COLUMN_MOVIE_ID + " integer unique on conflict ignore," +
                 MovieEntry.COLUMN_FAVORITE + " integer," +
                 MovieEntry.COLUMN_IMAGE + " blob" +
                 ");";
