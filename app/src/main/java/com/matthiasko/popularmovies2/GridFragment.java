@@ -279,16 +279,10 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
 
         // lets retrieve some more movies here from server
-        // the following will only be run one time
-        if (!sharedPrefs.getBoolean("firstTime", false)) {
-
+        if (sortOrder.equals("vote_average.desc")) {
             FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity());
             fetchMoviesTask.execute();
-
-            SharedPreferences.Editor editor = sharedPrefs.edit();
-            editor.putBoolean("firstTime", true);
-            editor.commit();
-            //Log.v("PREF", "FIRSTTIME...");
+            //System.out.println("GETTING BY VOTE COUNT...");
         }
     }
 
@@ -402,10 +396,12 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
             // Get sort order from preferences.
             SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+                    PreferenceManager.getDefaultSharedPreferences(mContext);
             String sortOrder = sharedPrefs.getString(
                     getString(R.string.pref_sort_order_key),
                     getString(R.string.pref_sort_order_default));
+
+            System.out.println("sortOrder = " + sortOrder);
 
             try {
                 final String MOVIE_BASE_URL =

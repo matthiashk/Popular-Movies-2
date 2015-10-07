@@ -67,11 +67,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private List<Button> mButtonList;
     private List<TextView> mTextViewList;
-    private String mYouTubeUrl;
+    private String mYouTubeUrl = null;
     private ShareActionProvider mShareActionProvider;
     private String mPosterURL = null;
     private String mMovieId = null;
     private int mFavorite;
+
+    private String mTitle = null;
+    private String mPlot = null;
+    private String mReleaseDate = null;
+    private String mPosterPath = null;
+    // java double will be initialized to 0.0, a java Double will be initialized to null.
+    private Double mUserRating = 0.0;
+
+
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -155,9 +166,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
         } else {
 
-            /* // TODO: temp disabled
-
             TmdbMovie movie = savedInstanceState.getParcelable("movie");
+
+            // set variables here again, otherwise they will be null
+            mTitle = movie.title;
+            mPlot = movie.plot;
+            mReleaseDate = movie.releaseDate;
+            mPosterPath = movie.posterPath;
+            mUserRating = movie.userRating;
 
             ((TextView) view.findViewById(R.id.details_movie_title))
                     .setText(movie.title);
@@ -191,10 +207,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             Picasso.with(getActivity())
                     .load(posterURL)
-                            //.resize(600, 900)
                     .into(imageView);
-
-           */
         }
         return view;
     }
@@ -251,32 +264,32 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             // update action bar favorite icon
             getActivity().invalidateOptionsMenu();
 
-            String lTitle = data.getString(COL_MOVIE_TITLE);
+            mTitle = data.getString(COL_MOVIE_TITLE);
             ((TextView) getView().findViewById(R.id.details_movie_title))
-                    .setText(lTitle);
+                    .setText(mTitle);
 
-            String lPlot = data.getString(COL_MOVIE_PLOT);
+            mPlot = data.getString(COL_MOVIE_PLOT);
             ((TextView) getView().findViewById(R.id.details_plot))
-                    .setText(lPlot);
+                    .setText(mPlot);
 
             // allow user to scroll the view containing the plot synopsis
             ((TextView) getView().findViewById(R.id.details_plot))
                     .setMovementMethod(new ScrollingMovementMethod());
 
-            double lUserRating = data.getDouble(COL_MOVIE_USER_RATING);
+            mUserRating = data.getDouble(COL_MOVIE_USER_RATING);
 
             // format the user rating, add '/10'
-            String formattedUserRating = String.format("%.1f", lUserRating) + "/10";
+            String formattedUserRating = String.format("%.1f", mUserRating) + "/10";
 
             ((TextView) getView().findViewById(R.id.details_user_rating))
                     .setText(formattedUserRating);
 
-            String lReleaseDate = data.getString(COL_MOVIE_RELEASE_DATE);
+            mReleaseDate = data.getString(COL_MOVIE_RELEASE_DATE);
 
             ((TextView) getView().findViewById(R.id.details_release_date))
-                    .setText(lReleaseDate);
+                    .setText(mReleaseDate);
 
-            String lPosterPath = data.getString(COL_MOVIE_POSTER_PATH);
+            mPosterPath = data.getString(COL_MOVIE_POSTER_PATH);
 
             // construct url for the full posterpath
             String baseURL = "http://image.tmdb.org/t/p/";
@@ -287,7 +300,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             // check if the movie is a favorite before displaying image
             // not a favorite, so fetch image from internet
             if (mFavorite == 0) {
-                mPosterURL = baseURL + thumbSize + lPosterPath;
+                mPosterURL = baseURL + thumbSize + mPosterPath;
                 Picasso.with(getActivity())
                         .load(mPosterURL)
                         .resize(600, 900)
@@ -592,24 +605,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        /*
-            put movie details in bundle and reload in onactivitycreated
+        /* put movie details in bundle and reload in oncreateview */
 
-         */
-        // TODO: temp disabled
-        /*
         TmdbMovie movie = new TmdbMovie();
 
-        movie.setTitle(movieTitle);
-        //movie.setId();
-        movie.setPosterPath(posterPath);
-        movie.setPlot(plot);
-        movie.setUserRating(userRating);
-        movie.setReleaseDate(releaseDate);
-        //movie.setVoteCount();
-        //movie.setMovieId();
+        movie.setTitle(mTitle);
 
-        outState.putParcelable("movie", movie);*/
+
+        movie.setPosterPath(mPosterPath);
+        movie.setPlot(mPlot);
+        movie.setUserRating(mUserRating);
+        movie.setReleaseDate(mReleaseDate);
+
+
+        outState.putParcelable("movie", movie);
     }
 
     /*

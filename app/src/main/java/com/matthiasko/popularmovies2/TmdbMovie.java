@@ -18,7 +18,8 @@ public class TmdbMovie implements Parcelable {
     int voteCount;
     int movieId;
 
-    //public TmdbMovie() {}
+    public TmdbMovie() {
+    }
 
     public long getId() {
         return id;
