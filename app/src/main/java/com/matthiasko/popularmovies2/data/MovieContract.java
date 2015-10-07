@@ -38,6 +38,9 @@ public class MovieContract {
 
         public static final String COLUMN_FAVORITE = "favorite";
         public static final String COLUMN_IMAGE = "image";
+        public static final String COLUMN_TRAILERS = "trailers";
+        public static final String COLUMN_REVIEWS = "reviews";
+
 
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);

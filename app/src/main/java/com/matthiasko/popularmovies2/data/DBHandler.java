@@ -34,7 +34,9 @@ public class DBHandler extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_VOTE_COUNT + " integer," +
                 MovieEntry.COLUMN_MOVIE_ID + " integer unique on conflict ignore," +
                 MovieEntry.COLUMN_FAVORITE + " integer," +
-                MovieEntry.COLUMN_IMAGE + " blob" +
+                MovieEntry.COLUMN_IMAGE + " blob," +
+                MovieEntry.COLUMN_TRAILERS + " text," +
+                MovieEntry.COLUMN_REVIEWS + " text" +
                 ");";
 
         // no sqlite bool type use integer 0 for false, 1 for true

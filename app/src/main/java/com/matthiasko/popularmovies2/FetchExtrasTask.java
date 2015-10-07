@@ -1,9 +1,12 @@
 package com.matthiasko.popularmovies2;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.matthiasko.popularmovies2.data.MovieContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,6 +34,7 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
 
     private final String LOG_TAG = FetchExtrasTask.class.getSimpleName();
     private final Context mContext;
+    private String mMovieId;
 
     public FetchExtrasTask(Context context, FetchExtrasResponse fetchExtrasResponse) {
         mContext = context;
@@ -53,11 +57,14 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
 
         final String TMDB_MOVIE_ID = "id";
 
-        ArrayList<YTObject> result = new ArrayList<YTObject>();
+        //ArrayList<YTObject> result = new ArrayList<YTObject>();
 
-        ArrayList<ReviewObject> reviewsArray = new ArrayList<ReviewObject>();
+        //ArrayList<ReviewObject> reviewsArray = new ArrayList<ReviewObject>();
 
-        Wrapper wrapper = new Wrapper();
+        //Wrapper wrapper = new Wrapper();
+
+        ArrayList<String> trailersArray = new ArrayList<String>();
+        ArrayList<String> reviewsArray = new ArrayList<String>();
 
         try {
 
@@ -78,6 +85,10 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
 
             //System.out.println("youtubeTrailers = " + youtubeTrailers.toString());
 
+            String trailersString = null;
+            final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?";
+            final String QUERY_PARAM = "v";
+
             for (int i = 0; i < youtubeTrailers.length(); i++) {
 
                 JSONObject objectInArray = youtubeTrailers.getJSONObject(i);
@@ -87,8 +98,20 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
                 String ytSource = objectInArray.getString("source");
                 String ytType = objectInArray.getString("type");
 
-                result.add(new YTObject(ytName, ytSize, ytSource, ytType));
+                final Uri builtUri = Uri.parse(YOUTUBE_BASE_URL)
+                        .buildUpon()
+                        .appendQueryParameter(QUERY_PARAM, ytSource)
+                        .build();
+
+                //System.out.println("builtUri = " + builtUri);
+
+                trailersArray.add(ytName);
+                trailersArray.add(builtUri.toString());
             }
+
+            //System.out.println("trailersString = " + trailersString);
+
+            //System.out.println("trailersArray = " + trailersArray.toString());
 
 
             JSONObject reviews = extrasJson.getJSONObject("reviews");
@@ -105,15 +128,12 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
                 String rContent = objectInArray.getString("content");
                 String rUrl = objectInArray.getString("url");
 
-                reviewsArray.add(new ReviewObject(rId, rAuthor, rContent, rUrl));
+                reviewsArray.add(rAuthor);
+                reviewsArray.add(rContent);
             }
 
-
-
-            wrapper.ytObjectArrayList = result;
-            wrapper.reviewObjectArrayList = reviewsArray;
-
-
+            //wrapper.ytObjectArrayList = result;
+            //wrapper.reviewObjectArrayList = reviewsArray;
 
             /*
                 we dont need wrapper class
@@ -125,11 +145,30 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
                 for trailers store url as one string separated by space
 
                 for reviews store author and content separated by space...
-
-
-
-
              */
+
+
+            JSONObject json = new JSONObject();
+            json.put("trailersArray", new JSONArray(trailersArray));
+            String trailersArrayList = json.toString();
+
+
+            JSONObject reviewsJson = new JSONObject();
+            reviewsJson.put("reviewsArray", new JSONArray(reviewsArray));
+            String reviewsArrayList = reviewsJson.toString();
+
+            ContentValues movieValues = new ContentValues();
+
+            movieValues.put(MovieContract.MovieEntry.COLUMN_TRAILERS, trailersArrayList);
+            movieValues.put(MovieContract.MovieEntry.COLUMN_REVIEWS, reviewsArrayList);
+
+            String selection = MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=" + mMovieId;
+
+            String[] selectionArgs = null;
+
+            // update movie entry, adding image and favorite status
+            mContext.getContentResolver().update(MovieContract.MovieEntry.CONTENT_URI, movieValues,
+                    selection, selectionArgs);
 
 
 
@@ -163,7 +202,7 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
             e.printStackTrace();
         }
 
-        return wrapper;
+        return null;
     }
 
     @Override
@@ -182,7 +221,7 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
         if (params.length == 0) {
             return null;
         }
-        String movieId = params[0];
+        mMovieId = params[0];
 
         //System.out.println("movieId = " + movieId);
 
@@ -203,7 +242,7 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
             // TODO: REMOVE api key before submitting project!!!
             Uri builtUri = Uri.parse(MOVIE_BASE_URL)
                     .buildUpon()
-                    .appendPath(movieId)
+                    .appendPath(mMovieId)
                     .appendQueryParameter(API_KEY_PARAM, "aa336466223f0deecbe36bf1aafd76d3")
                     .appendQueryParameter(APPEND_TO_RESPONSE, "trailers,reviews")
                     .build();
@@ -274,6 +313,6 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Wrapper> {
         }
         */
 
-        fetchExtrasResponse.onSuccess(wrapper);
+        fetchExtrasResponse.onSuccess();
     }
 }
