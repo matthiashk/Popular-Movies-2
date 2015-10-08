@@ -10,7 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class MainActivity extends ActionBarActivity implements GridFragment.OnHeadlineSelectedListener {
+public class MainActivity extends ActionBarActivity implements GridFragment.OnMovieSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,37 +50,20 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
 
         GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.grid_fragment);
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
             Intent settings = new Intent(getApplicationContext(), SettingsActivity.class);
             startActivity(settings);
-
             return true;
         }
 
         if (id == android.R.id.home) {
-
             View gridPane = findViewById(R.id.detail_fragment);
 
-            /*
-            // check fragment visibility
-            if (gridPane.getVisibility() == View.VISIBLE) {
-
-                //System.out.println("DETAIL FRAGMENT IS VISIBLE");
-
-            }
-
-            if (detailFragment == null) {
-
-                //System.out.println("detailFragment is NULL");
-            }*/
-
             // only execute if we are in portrait AND the gridPane is visible
-            // we have to mirror this action for the back button on the action bar...
+            // we have to mirror this action for the back button on the action bar
 
             int screenOrientation = getResources().getConfiguration().orientation;
             if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
@@ -140,7 +123,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnHe
         View gridPane = findViewById(R.id.detail_fragment);
 
         // only execute if we are in portrait AND the gridPane is visible
-        // we have to mirror this action for the back button on the action bar...
+        // we have to mirror this action for the back button on the action bar
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT

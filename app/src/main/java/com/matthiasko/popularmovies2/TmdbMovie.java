@@ -3,6 +3,8 @@ package com.matthiasko.popularmovies2;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 /** Class for storing movie data
  *
  */
@@ -17,6 +19,13 @@ public class TmdbMovie implements Parcelable {
     int popularity;
     int voteCount;
     int movieId;
+
+    ArrayList<String> trailerNames;
+    ArrayList<String> trailerUrls;
+    ArrayList<String> reviewNames;
+    ArrayList<String> reviewContent;
+
+    int favoriteButtonState;
 
     public TmdbMovie() {
     }
@@ -93,18 +102,38 @@ public class TmdbMovie implements Parcelable {
         this.movieId = movieId;
     }
 
+    public void setTrailerNames(ArrayList<String> trailerNames) {
+        this.trailerNames = trailerNames;
+    }
 
-    public TmdbMovie(String title, String posterPath, String plot, double userRating, String releaseDate,
-                 int popularity, int voteCount, int movieId) {
+    public ArrayList<String> getTrailerNames() { return trailerNames; }
 
-        this.title = title;
-        this.posterPath = posterPath;
-        this.plot = plot;
-        this.userRating = userRating;
-        this.releaseDate = releaseDate;
-        this.popularity = popularity;
-        this.voteCount = voteCount;
-        this.movieId = movieId;
+
+    public void setTrailerUrls(ArrayList<String> trailerUrls) {
+        this.trailerUrls = trailerUrls;
+    }
+
+    public ArrayList<String> getTrailerUrls() { return trailerUrls; }
+
+
+    public void setReviewNames(ArrayList<String> reviewNames) {
+        this.reviewNames = reviewNames;
+    }
+
+    public ArrayList<String> getReviewNames() { return reviewNames; }
+
+    public void setReviewContent(ArrayList<String> reviewContent) {
+        this.reviewContent = reviewContent;
+    }
+
+    public ArrayList<String> getReviewContent() { return reviewContent; }
+
+    public int getFavoriteButtonState() {
+        return favoriteButtonState;
+    }
+
+    public void setFavoriteButtonState(int favoriteButtonState) {
+        this.favoriteButtonState = favoriteButtonState;
     }
 
     // parcelable methods
@@ -125,6 +154,11 @@ public class TmdbMovie implements Parcelable {
         dest.writeInt(popularity);
         dest.writeInt(voteCount);
         dest.writeInt(movieId);
+        dest.writeList(trailerNames);
+        dest.writeList(trailerUrls);
+        dest.writeList(reviewNames);
+        dest.writeList(reviewContent);
+        dest.writeInt(favoriteButtonState);
     }
 
     public static final Parcelable.Creator<TmdbMovie> CREATOR = new Parcelable.Creator<TmdbMovie>() {
@@ -148,5 +182,10 @@ public class TmdbMovie implements Parcelable {
         popularity = source.readInt();
         voteCount = source.readInt();
         movieId = source.readInt();
+        trailerNames = source.readArrayList(null);
+        trailerUrls = source.readArrayList(null);
+        reviewNames = source.readArrayList(null);
+        reviewContent = source.readArrayList(null);
+        favoriteButtonState = source.readInt();
     }
 }

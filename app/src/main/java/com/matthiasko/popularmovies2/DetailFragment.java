@@ -23,7 +23,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.matthiasko.popularmovies2.data.MovieContract.MovieEntry;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -65,7 +64,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static final int COL_TRAILERS = 11;
     public static final int COL_REVIEWS = 12;
 
-    private List<Button> mButtonList;
+    private ArrayList<Button> mButtonList;
     private List<TextView> mTextViewList;
     private String mYouTubeUrl = null;
     private ShareActionProvider mShareActionProvider;
@@ -80,14 +79,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     // java double will be initialized to 0.0, a java Double will be initialized to null.
     private Double mUserRating = 0.0;
 
+    private ArrayList<String> mTrailersNameArray = new ArrayList<>();
+    private ArrayList<String> mTrailersUrlArray = new ArrayList<>();
+    private ArrayList<String> mReviewsNameArray = new ArrayList<>();
+    private ArrayList<String> mReviewsContentArray = new ArrayList<>();
+    private int mLastButtonId;
 
-
-
+    private RelativeLayout mRelativeLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        System.out.println("onCreate ----------");
     }
 
     @Override
@@ -106,6 +110,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         // check if the movie is a favorite and change menu icon if already favorited
+
+        System.out.println("onPrepareOptionsMenu");
+
         if (mFavorite == 0) {
             MenuItem favoriteButton = menu.findItem(R.id.action_favorite);
             favoriteButton.setIcon(R.drawable.ic_action_favorite);
@@ -158,11 +165,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        /* only called one time on start */
+        System.out.println("onCreateView ----------");
+
+        /* called on start and on rotation */
         // container is null here b/c we are loading from xml?
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
 
         if (savedInstanceState == null) {
+            System.out.println("savedInstanceState IS NULL");
+
             //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
         } else {
 
@@ -174,7 +185,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mReleaseDate = movie.releaseDate;
             mPosterPath = movie.posterPath;
             mUserRating = movie.userRating;
+            mFavorite = movie.favoriteButtonState;
 
+
+            /*
+            mTrailersNameArrayCopy = movie.trailerNames;
+            mTrailersUrlArrayCopy = movie.trailerUrls;
+
+            mReviewsNameArrayCopy = movie.reviewNames;
+            mReviewsContentArrayCopy = movie.reviewContent;
+            */
             ((TextView) view.findViewById(R.id.details_movie_title))
                     .setText(movie.title);
 
@@ -207,7 +227,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             Picasso.with(getActivity())
                     .load(posterURL)
+                    .resize(600, 900)
                     .into(imageView);
+
+            //removePreviousElements(movie.buttonsList, movie.reviewsList, view);
+
+            System.out.println("onCreateView - movie.trailerNames = " + movie.trailerNames.toString());
+
+            createTrailerElements(movie.trailerNames, movie.trailerUrls, view);
+            createReviewElements(movie.reviewNames, movie.reviewContent);
         }
         return view;
     }
@@ -215,23 +243,26 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        System.out.println("onViewCreated ----------");
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        /*
-        if (savedInstanceState == null) {
-
-            System.out.println("onActivityCreated - savedInstanceState NULL");
-        }
-
-        mBundle = savedInstanceState;
-        */
+        System.out.println("onActivityCreated ----------");
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        System.out.println("onCreateLoader ----------------------------------------");
+
+        mTrailersNameArray.clear();
+        mTrailersUrlArray.clear();
+
+        mReviewsNameArray.clear();
+        mReviewsContentArray.clear();
+
+        removePreviousElements(mButtonList, mTextViewList, getView());
 
         if (mMovieUri == null) {
             return null;
@@ -250,6 +281,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+        if (mTrailersNameArray != null) {
+
+            removePreviousElements(mButtonList, mTextViewList, getView());
+            System.out.println("mTrailersNameArray IS NOT NULL - REMOVE BUTTONS HERE");
+        }
+
+
+        //System.out.println("onLoadFinished ----------");
 
         if (data != null && data.moveToFirst()) {
 
@@ -306,7 +346,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         .resize(600, 900)
                         .into(imageView);
 
-            // is a favorite, so fetch image from db
+                // is a favorite, so fetch image from db
             } else if (mFavorite == 1) {
 
                 byte[] imageFromDB = data.getBlob(COL_IMAGE);
@@ -337,9 +377,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         .into(imageView);
             }
 
-            // lets make 2 arraylists here for trailer name and trailer link
-            ArrayList<String> trailersNameArray = new ArrayList<String>();
-            ArrayList<String> trailersUrlArray = new ArrayList<String>();
+            // call method to remove buttons and reviews that were
+            // previously created. we need to call this also in oncreateview.
+            //removePreviousElements(mButtonList, mTextViewList, getView());
 
             try {
                 // dont populate array if the column is null
@@ -349,24 +389,24 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     //System.out.println("NULL COL_TRAILERS");
                 } else {
 
+                    mTrailersUrlArray = new ArrayList<>();
+                    mTrailersNameArray = new ArrayList<>();
+
                     JSONObject json = new JSONObject(data.getString(COL_TRAILERS));
                     JSONArray items = json.optJSONArray("trailersArray");
 
                     for (int i = 0; i < items.length(); i++) {
-
                         // get trailer urls
                         // we need to get only even numbered positions here
                         if (i % 2 != 0) {
-
                             String stringValue = items.optString(i);
-                            trailersUrlArray.add(stringValue);
+                            mTrailersUrlArray.add(stringValue);
                         }
 
                         // get trailer names, these will be in odd numbered positions
                         if (i % 2 == 0) {
-
                             String stringValue = items.optString(i);
-                            trailersNameArray.add(stringValue);
+                            mTrailersNameArray.add(stringValue);
                         }
                     }
                 }
@@ -374,201 +414,249 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 e.printStackTrace();
             }
 
-            // create trailer links here
-            if (trailersUrlArray.size() != 0) {
-
-                // here is where we remove the previously created buttons from the view
-                if (mButtonList == null) {
-
+            try {
+                // dont populate array if the column is null
+                // the column WILL be null since onloadfinished is called
+                // before the column is updated
+                if (data.getString(COL_REVIEWS) == null) {
                 } else {
 
-                    RelativeLayout relativeLayout = (RelativeLayout) getView().findViewById(R.id.details_layout);
+                    mReviewsContentArray = new ArrayList<>();
+                    mReviewsNameArray = new ArrayList<>();
 
-                    // remove buttons from view
-                    for (int i = 0; i < mButtonList.size(); i++) {
 
-                        relativeLayout.removeView(mButtonList.get(i));
-                    }
-                    mButtonList.clear();
-                }
+                    JSONObject json = new JSONObject(data.getString(COL_REVIEWS));
+                    JSONArray items = json.optJSONArray("reviewsArray");
 
-                // remove previously created textviews of reviews from view
-                if (mTextViewList == null) {
+                    for (int i = 0; i < items.length(); i++) {
+                        if (i % 2 != 0) {
+                            String stringValue = items.optString(i);
+                            mReviewsContentArray.add(stringValue);
+                        }
 
-                } else {
-
-                    RelativeLayout relativeLayout = (RelativeLayout) getView().findViewById(R.id.details_layout);
-
-                    for (int i = 0; i < mTextViewList.size(); i++) {
-
-                        relativeLayout.removeView(mTextViewList.get(i));
-                    }
-                    mTextViewList.clear();
-                }
-
-                //returns base view of the fragment
-                View view = getView();
-                if ( view == null)
-                    return;
-                if ( !(view instanceof ViewGroup)){
-                    return;
-                }
-
-                RelativeLayout relativeLayout = (RelativeLayout) getView().findViewById(R.id.details_layout);
-
-                // make buttons based on how many youtube links there are
-                mButtonList = new ArrayList<Button>();
-                for (int i = 0; i < trailersUrlArray.size(); i++) {
-                    mButtonList.add(new Button(getActivity()));
-                }
-
-                int z = 1; // use this to set button ids
-
-                int lastButtonId = trailersUrlArray.size();
-
-                for (int i=0; i < trailersUrlArray.size(); i++) {
-
-                    mButtonList.get(i).setLayoutParams(new RelativeLayout.LayoutParams(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT));
-
-                    mButtonList.get(i).setId(z);
-
-                    mButtonList.get(i).setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
-
-                    mButtonList.get(i).setText(trailersNameArray.get(i));
-
-                    // sample youtube url https://www.youtube.com/watch?v=JAUoeqvedMo
-
-                    // get first youtube link only to put into share intent
-                    if (i == 0) {
-
-                        mYouTubeUrl = trailersUrlArray.get(i);
-
-                        if (mShareActionProvider == null) {
-
-                            mShareActionProvider = new ShareActionProvider(getActivity());
-
-                            mShareActionProvider.setShareIntent(createShareIntent());
-
-                        } else {
-
-                            mShareActionProvider.setShareIntent(createShareIntent());
+                        if (i % 2 == 0) {
+                            String stringValue = items.optString(i);  // strings in the array
+                            mReviewsNameArray.add(stringValue);
                         }
                     }
-
-                    final Uri trailerUri = Uri.parse(trailersUrlArray.get(i));
-
-                    mButtonList.get(i).setOnClickListener(new View.OnClickListener() {
-                        public void onClick(View v) {
-                            Intent ytLink = new Intent(android.content.Intent.ACTION_VIEW);
-                            ytLink.setData(trailerUri);
-                            startActivity(ytLink);
-                        }
-                    });
-
-                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                            RelativeLayout.LayoutParams.WRAP_CONTENT,
-                            RelativeLayout.LayoutParams.WRAP_CONTENT);
-
-                        // setting up button placement in the view
-                        // set the first button under the plot textview
-                        if(i == 0) {
-
-                            layoutParams.addRule(RelativeLayout.BELOW, R.id.details_plot);
-                            mButtonList.get(i).setLayoutParams(layoutParams);
-                            relativeLayout.addView(mButtonList.get(i));
-                        } else {
-                            // set the other buttons under each other
-                            layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(i).getId() - 1);
-                            mButtonList.get(i).setLayoutParams(layoutParams);
-                            relativeLayout.addView(mButtonList.get(i));
-                        }
-                        z++;
-                    }
-
-                /* start code to create review textviews */
-
-                ArrayList<String> reviewsNameArray = new ArrayList<String>();
-                ArrayList<String> reviewsContentArray = new ArrayList<String>();
-
-                try {
-                    // dont populate array if the column is null
-                    // the column WILL be null since onloadfinished is called
-                    // before the column is updated
-                    if (data.getString(COL_REVIEWS) == null) {
-
-                    } else {
-
-                        JSONObject json = new JSONObject(data.getString(COL_REVIEWS));
-                        JSONArray items = json.optJSONArray("reviewsArray");
-
-                        for (int i = 0; i < items.length(); i++) {
-
-                            if (i % 2 != 0) {
-                                String stringValue = items.optString(i);
-                                reviewsContentArray.add(stringValue);
-                            }
-
-                            if (i % 2 == 0) {
-                                String stringValue = items.optString(i);  // strings in the array
-                                reviewsNameArray.add(stringValue);
-                            }
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-
-                // this will match if no reviews
-                if (reviewsNameArray.size() == 0) {
-
-                    // skip review creation code
-                } else {
-
-                    // process reviews here
-                    // setup textviews depending on how many reviews there are
-                    mTextViewList = new ArrayList<TextView>();
-                    for (int i = 0; i < reviewsNameArray.size(); i++) {
-                        mTextViewList.add(new TextView(getActivity()));
-                    }
-
-                    int a = 1000; // use this to set textview ids ... ids must be unique!
-
-                    for (int i=0; i < reviewsNameArray.size(); i++) {
-
-                        mTextViewList.get(i).setLayoutParams(new RelativeLayout.LayoutParams(
-                                ViewGroup.LayoutParams.WRAP_CONTENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT));
-
-                        mTextViewList.get(i).setId(a);
-
-                        mTextViewList.get(i).setBackgroundColor(getResources().getColor(android.R.color.holo_blue_light));
-
-                        // add reviewer name + newline + review content
-                        String newLine = System.getProperty("line.separator");
-                        String reviewerName = reviewsNameArray.get(i);
-
-                        mTextViewList.get(i).setText(reviewerName + newLine + reviewsContentArray.get(i));
-
-                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                                RelativeLayout.LayoutParams.WRAP_CONTENT);
-
-                        if(i == 0) {
-                            // set the review to be under the last button for trailers
-                            layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(lastButtonId-1).getId());
-                            mTextViewList.get(i).setLayoutParams(layoutParams);
-                            relativeLayout.addView(mTextViewList.get(i));
-                        } else {
-                            layoutParams.addRule(RelativeLayout.BELOW, mTextViewList.get(i).getId() - 1);
-                            mTextViewList.get(i).setLayoutParams(layoutParams);
-                            relativeLayout.addView(mTextViewList.get(i));
-                        }
-                        a++; // increment our textview id
-                    }
-                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
+
+
+
+
+            // this block will get called multiple times
+            // this will get called by FetchFavoriteTask also
+
+            createTrailerElements(mTrailersNameArray, mTrailersUrlArray, getView());
+            createReviewElements(mReviewsNameArray, mReviewsContentArray);
+
+        }
+    }
+
+    public void createTrailerElements(ArrayList<String> trailerNames, ArrayList<String> trailerUrls, View view) {
+        // create trailer links here
+        if (trailerNames != null) {
+
+            //returns base view of the fragment
+            /*
+            View view = getView();
+            if ( view == null)
+                return;
+            if ( !(view instanceof ViewGroup)){
+                return;
+            }*/
+
+            mLastButtonId = trailerUrls.size();
+
+            mRelativeLayout = (RelativeLayout) view.findViewById(R.id.details_layout);
+
+            // make buttons based on how many youtube links there are
+            mButtonList = new ArrayList<Button>();
+            for (int i = 0; i < trailerUrls.size(); i++) {
+                mButtonList.add(new Button(getActivity()));
+            }
+
+            //System.out.println("trailerUrls.size() = " + trailerUrls.size());
+
+            System.out.println("createTrailerElements - mButtonList.size() = " + mButtonList.size());
+            System.out.println("createTrailerElements - trailerUrls.size() = " + trailerUrls.size());
+
+
+            int z = 1; // use this to set button ids
+
+            for (int i = 0; i < trailerUrls.size(); i++) {
+                mButtonList.get(i).setLayoutParams(new RelativeLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                mButtonList.get(i).setId(z);
+
+                mButtonList.get(i).setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+
+                mButtonList.get(i).setText(trailerNames.get(i));
+
+                //System.out.println("trailerNames.get(i) = " + trailerNames.get(i));
+
+                // sample youtube url https://www.youtube.com/watch?v=JAUoeqvedMo
+
+                // get first youtube link only to put into share intent
+                if (i == 0) {
+                    mYouTubeUrl = trailerUrls.get(i);
+                    if (mShareActionProvider == null) {
+                        mShareActionProvider = new ShareActionProvider(getActivity());
+                        mShareActionProvider.setShareIntent(createShareIntent());
+                    } else {
+                        mShareActionProvider.setShareIntent(createShareIntent());
+                    }
+                }
+
+                final Uri trailerUri = Uri.parse(trailerUrls.get(i));
+
+                mButtonList.get(i).setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent ytLink = new Intent(android.content.Intent.ACTION_VIEW);
+                        ytLink.setData(trailerUri);
+                        startActivity(ytLink);
+                    }
+                });
+
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+                // setting up button placement in the view
+                // set the first button under the plot textview
+                if(i == 0) {
+                    layoutParams.addRule(RelativeLayout.BELOW, R.id.details_plot);
+                    mButtonList.get(i).setLayoutParams(layoutParams);
+                    mRelativeLayout.addView(mButtonList.get(i));
+                } else {
+                    // set the other buttons under each other
+                    layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(i).getId() - 1);
+                    mButtonList.get(i).setLayoutParams(layoutParams);
+                    mRelativeLayout.addView(mButtonList.get(i));
+                }
+                z++;
+            }
+        }
+
+
+        /*
+        // this should run only once, since onloadfinished will run multiple times
+        if(!alreadyExecuted) {
+
+
+
+            //    the arraylists here are becoming empty on rotation...
+
+
+            System.out.println("ONLOADFINISHED ---------");
+            for (String item : mTrailersNameArray) mTrailersNameArrayCopy.add(item);
+            for (String item : mTrailersUrlArray) mTrailersUrlArrayCopy.add(item);
+            alreadyExecuted = true;
+
+            System.out.println("mTrailersNameArray = " + mTrailersNameArray.toString());
+            System.out.println("mTrailersNameArrayCopy = " + mTrailersNameArrayCopy.toString());
+        }*/
+
+        //mTrailersNameArray.clear();
+        //mTrailersUrlArray.clear();
+    }
+
+    public void createReviewElements(ArrayList<String> reviewNames, ArrayList<String> reviewContent) {
+        /* create review textviews */
+
+
+
+        //System.out.println("createReviewElements mButtonList.size() = " + mButtonList.size());
+
+        // this will match if no reviews
+        if (reviewNames == null) {
+
+            System.out.println("SKIPPING REVIEWS CREATION");
+            // skip review creation code
+        } else {
+            // process reviews here
+            // setup textviews depending on how many reviews there are
+            mTextViewList = new ArrayList<TextView>();
+            for (int i = 0; i < reviewNames.size(); i++) {
+                mTextViewList.add(new TextView(getActivity()));
+            }
+
+            System.out.println("createReviewElements - mTextViewList.size() = " + mTextViewList.size());
+
+            int a = 1000; // use this to set textview ids ... ids must be unique!
+
+            for (int i=0; i < reviewNames.size(); i++) {
+
+                mTextViewList.get(i).setLayoutParams(new RelativeLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                mTextViewList.get(i).setId(a);
+
+                mTextViewList.get(i).setBackgroundColor(getResources().getColor(android.R.color.holo_blue_light));
+
+                // add reviewer name + newline + review content
+                String newLine = System.getProperty("line.separator");
+                String reviewerName = reviewNames.get(i);
+
+                mTextViewList.get(i).setText(reviewerName + newLine + reviewContent.get(i));
+
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+                if(i == 0) {
+                    // set the review to be under the last button for trailers
+                    layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(mLastButtonId-1).getId());
+                    mTextViewList.get(i).setLayoutParams(layoutParams);
+                    mRelativeLayout.addView(mTextViewList.get(i));
+                } else {
+                    layoutParams.addRule(RelativeLayout.BELOW, mTextViewList.get(i).getId() - 1);
+                    mTextViewList.get(i).setLayoutParams(layoutParams);
+                    mRelativeLayout.addView(mTextViewList.get(i));
+                }
+                a++; // increment our textview id
+            }
+        }
+    }
+
+    public void removePreviousElements(List<Button> buttonList, List<TextView> textViewList, View view) {
+        // here is where we remove the previously created buttons from the view
+        // we are calling this from oncreateview and onloadfinished
+
+        if (buttonList == null) {
+
+            System.out.println("removePreviousElements - mButtonList IS NULL");
+
+        } else {
+
+            //System.out.println("removePreviousElements - removing buttons");
+            System.out.println("removePreviousElements - buttonList.size() = " + buttonList.size());
+
+            //System.out.println("removePreviousElements");
+
+            mRelativeLayout = (RelativeLayout) view.findViewById(R.id.details_layout);
+            // remove buttons from view
+            for (int i = 0; i < buttonList.size(); i++) {
+                mRelativeLayout.removeView(buttonList.get(i));
+            }
+            //mButtonList.clear(); // null here?
+        }
+        // remove previously created textviews of reviews from view
+        if (textViewList == null) {
+
+        } else {
+
+            mRelativeLayout = (RelativeLayout) view.findViewById(R.id.details_layout);
+            for (int i = 0; i < textViewList.size(); i++) {
+                mRelativeLayout.removeView(textViewList.get(i));
+            }
+            //mTextViewList.clear();
         }
     }
 
@@ -577,7 +665,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     /* called when item is selected from the gridview from mainactivity */
     public void updateArticleView(Bundle bundle) {
-
         // bundle is URI as string from gridfragment
         String uriString = bundle.getString("movieURI");
         mMovieUri = Uri.parse(uriString);
@@ -585,58 +672,32 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         //getLoaderManager().enableDebugLogging(true);
     }
 
-    /* // TODO: temp disabled, do we need this?
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        //savedState = saveState();
-        //sampleText = null;
-    }
-    */
-
-    /*
-    private Bundle saveState() { // called either from onDestroyView() or onSaveInstanceState()
-        //Bundle state = new Bundle();
-        //state.putCharSequence("WORKS!", sampleText.getText());
-        return state;
-    }
-    */
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         /* put movie details in bundle and reload in oncreateview */
 
+        //System.out.println("onSaveInstanceState ---------");
+
+        //System.out.println("onSaveInstanceState - mButtonList.size() = " + mButtonList.size());
+
+        //System.out.println("onSaveInstanceState - mTitle = " + mTitle);
+        //System.out.println("onSaveInstanceState - mTrailersNameArray = " + mTrailersNameArray.toString());
+
         TmdbMovie movie = new TmdbMovie();
-
         movie.setTitle(mTitle);
-
-
         movie.setPosterPath(mPosterPath);
         movie.setPlot(mPlot);
         movie.setUserRating(mUserRating);
         movie.setReleaseDate(mReleaseDate);
-
+        movie.setTrailerNames(mTrailersNameArray);
+        movie.setTrailerUrls(mTrailersUrlArray);
+        movie.setReviewNames(mReviewsNameArray);
+        movie.setReviewContent(mReviewsContentArray);
+        movie.setFavoriteButtonState(mFavorite);
 
         outState.putParcelable("movie", movie);
     }
-
-    /*
-    public void updateDetails(Bundle landscapeBundle) { // TODO: needed?
-        Bundle bundle = landscapeBundle;
-        if (bundle != null) {
-            //System.out.println("updateDetails - xxxmovieTitle:" + movieTitle);
-            movieTitle = bundle.getString("title");
-            posterPath = bundle.getString("posterpath");
-            plot = bundle.getString("plot");
-            userRating = bundle.getDouble("userrating");
-            releaseDate = bundle.getString("releasedate");
-        }
-        //((TextView) view.findViewById(R.id.details_movie_title)).setText(movieTitle);
-        // need to call refresh here?
-        //System.out.println("xmovieTitle:" + movieTitle);
-        //landscapeBundle = bundle;
-    }*/
 
     // get result from fetchextrastask
     @Override

@@ -54,21 +54,9 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     private static final String[] PROJECTION = new String[] { "_id", "title", "poster_path", "plot",
             "user_rating", "release_date", "popularity", "vote_count", "movie_id"};
 
-    OnHeadlineSelectedListener mCallback;
+    OnMovieSelectedListener mCallback;
 
     private static final int DETAIL_LOADER = 0;
-
-    private static final String[] DETAIL_COLUMNS = {
-            MovieEntry.TABLE_NAME + "." + MovieEntry._ID,
-            MovieEntry.COLUMN_TITLE,
-            MovieEntry.COLUMN_POSTER_PATH,
-            MovieEntry.COLUMN_PLOT,
-            MovieEntry.COLUMN_USER_RATING,
-            MovieEntry.COLUMN_RELEASE_DATE,
-            MovieEntry.COLUMN_POPULARITY,
-            MovieEntry.COLUMN_VOTE_COUNT,
-            MovieEntry.COLUMN_MOVIE_ID,
-    };
 
     public static final int COL_ID = 0;
     public static final int COL_MOVIE_TITLE = 1;
@@ -80,17 +68,21 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     public static final int COL_MOVIE_VOTE_COUNT = 7;
     public static final int COL_MOVIE_ID = 8;
 
-    public GridFragment() { }
+    public GridFragment() {}
 
-    public interface OnHeadlineSelectedListener {
-        /** Called by HeadlinesFragment when a list item is selected */
+    private Context mGridContext;
+
+    /* Replace API_KEY here. Also replace API_KEY in FetchExtrasTask. */
+    private final String API_KEY = "aa336466223f0deecbe36bf1aafd76d3";
+
+    public interface OnMovieSelectedListener {
         public void onArticleSelected(Bundle bundle);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //System.out.println("GRIDFRAGMENT - onCreate");
+        mGridContext = getActivity().getApplicationContext();
     }
 
     @Override
@@ -100,68 +92,23 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), null, 0);
         mGridview = (GridView) view.findViewById(R.id.gridview);
         mGridview.setAdapter(mImageAdapter);
-        /*
-        if (savedInstanceState == null) {
 
-            System.out.println("GRIDFRAGMENT - savedInstanceState is null");
-
-        } else {
-
-            System.out.println("GRIDFRAGMENT - savedInstanceState is NOT null");
-        }*/
         return view;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        /*
-            use parcelable movie class and putparcable method to save movies in bundle
-         */
-
-        //Intent parcelIntent = new Intent();
-        //ArrayList<TmdbMovie> dataList = new ArrayList<TmdbMovie>();
-        /*
-         * Add elements in dataLists e.g.
-         * ParcelData pd1 = new ParcelData();
-         * ParcelData pd2 = new ParcelData();
-         *
-         * fill in data in pd1 and pd2
-         *
-         * dataLists.add(pd1);
-         * dataLists.add(pd2);
-         */
-
-        /*
-        TmdbMovie movie1 = new TmdbMovie();
-
-        movie1.setTitle("Mad Max");
-        movie1.setPosterPath("myposterpath");
-        movie1.setPlot("in a world...");
-        movie1.setUserRating(9);
-        movie1.setReleaseDate("1-1-2015");
-        movie1.setPopularity(7);
-        movie1.setVoteCount(11);
-        movie1.setMovieId(0000001);
-
-        dataList.add(movie1);
-        */
-
-        //TODO: fix
-        //outState.putParcelableArrayList("custom_data_list", (ArrayList<TmdbMovie>)mUriPaths);
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception.
         try {
-            mCallback = (OnHeadlineSelectedListener) activity;
+            mCallback = (OnMovieSelectedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnHeadlineSelectedListener");
+                    + " must implement OnMovieSelectedListener");
         }
     }
 
@@ -186,7 +133,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                 String movieIDString = String.valueOf(cursor.getInt(COL_MOVIE_ID));
 
                 FetchExtrasTask extrasTask = new FetchExtrasTask(getActivity(), detailFragment);
-
                 extrasTask.execute(movieIDString);
             }
             }
@@ -224,35 +170,13 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             fetchMoviesTask.execute();
             //Log.v("GRIDFRAGMENT", "no db found. fetching...");
         }
+
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
 
         if (savedInstanceState == null) {
 
             //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
         } else {
-
-            //List<String> uriPaths = new ArrayList<String>();
-
-            //ArrayList<TmdbMovie> dataList = new ArrayList<TmdbMovie>();
-
-            //Intent intent = getActivity().getIntent();
-
-            //uriPaths = savedInstanceState.getStringArrayList("custom_data_list");
-
-            //TmdbMovie movie1 = (TmdbMovie) dataList.get(0);
-
-            //System.out.println("GRIDFRAGMENT - EXTRA = " + uriPaths.get(0));
-
-            // get savedInstanceState here and set to adapter?
-
-            //String fromBundle = savedInstanceState.getString("myKey");
-
-            //System.out.println("GRIDFRAGMENT - fromBundle = " + fromBundle);
-
-            //mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), uriPaths);
-            //mGridview.setAdapter(mImageAdapter);
-            //mImageAdapter.notifyDataSetChanged();
-
             // this fixed issues with displaying images after rotation change
             getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
         }
@@ -260,33 +184,36 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
         /* we want to fetch movies with the new sort order once before using db
          in order to populate the db with more movies */
 
-        // get sort order from preferences
-        SharedPreferences sharedPrefs =
-                PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+        // check if the gridfragment is attached to the activity or else we crash
+        if (isAdded()) {
 
-        String sortOrder = sharedPrefs.getString(
-                getString(R.string.pref_sort_order_key),
-                getString(R.string.pref_sort_order_default));
+            // get sort order from preferences
+            SharedPreferences sharedPrefs =
+                    PreferenceManager.getDefaultSharedPreferences(mGridContext);
 
-        // set mSortOrder so we can read in onCreateLoader
-        mSortOrder = sortOrder;
-        //System.out.println("onSharedPreferenceChanged");
-        // refresh loader so we can change sort order
-        getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+            String sortOrder = sharedPrefs.getString(
+                    getString(R.string.pref_sort_order_key),
+                    getString(R.string.pref_sort_order_default));
 
-        // lets retrieve some more movies here from server
-        if (sortOrder.equals("vote_average.desc")) {
-            FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity());
-            fetchMoviesTask.execute();
-            //System.out.println("GETTING BY VOTE COUNT...");
+            // set mSortOrder so we can read in onCreateLoader
+            mSortOrder = sortOrder;
+            //System.out.println("onSharedPreferenceChanged");
+            // refresh loader so we can change sort order
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+
+            // lets retrieve some more movies here from server,
+            // fetch based on vote average
+            if (sortOrder.equals("vote_average.desc")) {
+                FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity());
+                fetchMoviesTask.execute();
+            }
         }
     }
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, Void> { // TODO: put in seperate file
+    public class FetchMoviesTask extends AsyncTask<String, Void, Void> {
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
         private final Context mContext;
@@ -310,8 +237,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
             final String TMDB_MOVIE_ID = "id";
 
-            //ArrayList<String> trailers = new ArrayList<String>();
-
             try {
 
                 JSONObject forecastJson = new JSONObject(forecastJsonStr);
@@ -333,26 +258,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                     int popularity = oneObject.getInt(TMDB_POPULARITY);
                     int voteCount = oneObject.getInt(TMDB_VOTE_COUNT);
                     int movieID = oneObject.getInt(TMDB_MOVIE_ID);
-
-                    /*JSONArray trailers = oneObject.getJSONArray("trailers");
-                    JSONArray youtubeTrailers = trailers.getJSONArray(1);
-                    String ytName = youtubeTrailers.getString(0);
-                    String ytSize = youtubeTrailers.getString(1);
-                    String ytSource = youtubeTrailers.getString(2);
-                    String ytType = youtubeTrailers.getString(3);
-
-                    System.out.println("ytName = " + ytName);
-                    System.out.println("ytSize = " + ytSize);
-                    System.out.println("ytSource = " + ytSource);
-                    System.out.println("ytType = " + ytType);
-*/
-
-
-
-
-
-
-
 
                     ContentValues movieValues = new ContentValues();
 
@@ -376,16 +281,15 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                     cVVector.toArray(cvArray);
                     inserted = mContext.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI, cvArray);
                 }
-                //Log.d(LOG_TAG, "FetchWeatherTask Complete. " + inserted + " Inserted");
             }
-                catch(JSONException e){
-                    e.printStackTrace();
-                }
+
+            catch(JSONException e){
+                e.printStackTrace();
             }
+        }
 
         @Override
         protected Void doInBackground(String... params) {
-
             /* Create api url request and send results to json parser. */
 
             HttpURLConnection urlConnection = null;
@@ -401,29 +305,24 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                     getString(R.string.pref_sort_order_key),
                     getString(R.string.pref_sort_order_default));
 
-            System.out.println("sortOrder = " + sortOrder);
+            //System.out.println("sortOrder = " + sortOrder);
 
             try {
-                final String MOVIE_BASE_URL =
-                        "http://api.themoviedb.org/3/discover/movie?";
+                final String MOVIE_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
                 final String SORT_BY_PARAM = "sort_by";
                 final String API_KEY_PARAM = "api_key";
                 final String VOTE_COUNT = "vote_count.gte";
-                //final String APPEND_TO_RESPONSE = "append_to_response";
 
-                // TODO: REMOVE api key before submitting project!!!
                 Uri builtUri = Uri.parse(MOVIE_BASE_URL)
                         .buildUpon()
                         .appendQueryParameter(SORT_BY_PARAM, sortOrder)
                         .appendQueryParameter(VOTE_COUNT, "75")
-                        .appendQueryParameter(API_KEY_PARAM, "aa336466223f0deecbe36bf1aafd76d3")
-                        //.appendQueryParameter(APPEND_TO_RESPONSE, "trailers,reviews")
+                        .appendQueryParameter(API_KEY_PARAM, API_KEY)
                         .build();
 
                 URL url = new URL(builtUri.toString());
 
                 //System.out.println("builtUri = " + builtUri.toString());
-
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -452,7 +351,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                 moviesJsonStr = buffer.toString();
 
                 getMovieDataFromJson(moviesJsonStr);
-                //Log.v(LOG_TAG, moviesJsonStr);
 
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
@@ -463,7 +361,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             }
 
             finally {
-
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -477,52 +374,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             }
             return null;
         }
-        /*
-        @Override
-        protected void onPostExecute(ArrayList<TmdbMovie> movieData) {
-
-            resultsFromFetch(movieData);
-
-            posterUrls.clear();
-
-            // get the array of strings containing the poster paths and set to posterUrls
-            if (movieData != null) {
-                for (TmdbMovie item : movieData) {
-                    posterUrls.add(item.posterPath);
-                }
-            }
-
-            // create new array containing complete poster urls
-            ArrayList<String> posterUrlsFinal = new ArrayList<String>();
-
-            String baseURL = "http://image.tmdb.org/t/p/";
-
-            String thumbSize = "w185";
-
-            String posterPath = null;
-
-            String finalURL = null;
-
-            //Log.d("this is my array", "posterUrls: " + Arrays.toString(posterUrls));
-
-            for (int i = 0; i < posterUrls.size(); i++) {
-                posterPath = posterUrls.get(i);
-                finalURL = baseURL + thumbSize + posterPath;
-                posterUrlsFinal.add(finalURL);
-            }
-
-            List<String> uriPaths = new ArrayList<String>();
-            // clear the default image list before adding
-            uriPaths.clear();
-
-            for (int i = 0; i < posterUrlsFinal.size(); i++) {
-                uriPaths.add(posterUrlsFinal.get(i));
-            }
-
-            mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), uriPaths);
-            mGridview.setAdapter(mImageAdapter);
-            mImageAdapter.notifyDataSetChanged();
-        }*/
     }
 
     @Override
@@ -544,15 +395,9 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
         } else if  (mSortOrder.equals("favorites")) {
 
-
-            // TODO: Create selection to filter db for only favorites
-
             selection = MovieEntry.COLUMN_FAVORITE + "=" + 1;
 
         }
-
-
-
 
         return new CursorLoader(
                 getActivity(),
