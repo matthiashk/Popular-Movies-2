@@ -71,6 +71,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     public GridFragment() {}
 
     private Context mGridContext;
+    private int mScrollPosition;
 
     /* Replace API_KEY here. Also replace API_KEY in FetchExtrasTask. */
     private final String API_KEY = "aa336466223f0deecbe36bf1aafd76d3";
@@ -93,13 +94,31 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         mGridview = (GridView) view.findViewById(R.id.gridview);
         mGridview.setAdapter(mImageAdapter);
 
+        //System.out.println("onCreateView");
+
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mScrollPosition = mGridview.getFirstVisiblePosition();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        //System.out.println("onSaveInstanceState ----------");
+
+        //System.out.println("onSaveInstanceState - mScrollPosition = " + mScrollPosition);
+
+        outState.putInt("savedPosition", mScrollPosition);
+
     }
+
+
 
     @Override
     public void onAttach(Activity activity) {
@@ -173,13 +192,25 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
 
+        /* // not needed remove?
         if (savedInstanceState == null) {
 
             //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
         } else {
+
+            //System.out.println("onActivityCreated - savedInstanceState ----------");
+
+            mScrollPosition = savedInstanceState.getInt("savedPosition");
+
+            System.out.println("onActivityCreated - mScrollPosition = " + mScrollPosition);
+
+            mGridview.setSelection(mScrollPosition);
+
             // this fixed issues with displaying images after rotation change
             getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
-        }
+        }*/
+
+
     }
 
     @Override

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- colors chosen from https://www.google.com/design/spec/style/color.html#color-color-palette -->
+<resources>
+    <color name="lightGrey">#BDBDBD</color>
+    <color name="lighterGrey">#EEEEEE</color>
+    <color name="darkGrey">#757575</color>
+    <color name="darkGrey2">#9E9E9E</color>
+    <color name="lightBlack">#616161</color>
+</resources>

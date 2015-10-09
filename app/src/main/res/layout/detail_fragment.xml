@@ -11,13 +11,14 @@
     android:id="@+id/details_layout">
 
     <TextView
+        android:id="@+id/details_movie_title"
         android:text="@string/textview_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/details_movie_title"
-        android:textSize="28dp"
-        android:paddingLeft="5dp"
+        android:textSize="35sp"
+        android:paddingLeft="10dp"
         android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -25,9 +26,9 @@
         android:textColor="#ffffff" />
 
     <ImageView
+        android:id="@+id/details_imageview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/details_imageview"
         android:paddingTop="10dp"
         android:layout_weight="1.66"
         android:layout_below="@+id/details_movie_title"
@@ -36,66 +37,63 @@
         android:layout_marginLeft="10dp" />
 
     <TextView
+        android:id="@+id/details_plot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Plot Synopsis"
-        android:id="@+id/details_plot"
-        android:textSize="15dp"
-        android:paddingTop="10dp"
+        android:textSize="18sp"
+        android:paddingTop="20dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:layout_below="@+id/details_imageview"
-
-
-        android:textColor="#ffffff"
-        android:background="#000000" />
+        android:paddingBottom="30dp"
+        android:layout_below="@+id/details_imageview" />
 
     <TextView
+        android:id="@+id/details_release_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Year"
-        android:id="@+id/details_release_date"
-        android:textSize="15dp"
-        android:paddingLeft="5dp"
+        android:textSize="18sp"
+        android:paddingLeft="10dp"
         android:paddingTop="5dp"
         android:layout_below="@+id/details_release_date_label"
         android:layout_toRightOf="@+id/details_imageview" />
 
     <TextView
+        android:id="@+id/details_user_rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User Rating"
-        android:id="@+id/details_user_rating"
-        android:paddingLeft="5dp"
+        android:textSize="18sp"
+        android:paddingLeft="10dp"
         android:paddingTop="5dp"
         android:layout_below="@+id/details_user_rating_label"
         android:layout_toRightOf="@+id/details_imageview" />
 
     <TextView
+        android:id="@+id/details_release_date_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Release Date:"
-        android:id="@+id/details_release_date_label"
+        android:text="@string/release_date_label"
+        android:textSize="18sp"
         android:paddingTop="10dp"
-        android:paddingLeft="5dp"
+        android:paddingLeft="10dp"
         android:layout_alignTop="@+id/details_imageview"
         android:layout_toRightOf="@+id/details_imageview"
         android:layout_toEndOf="@+id/details_imageview" />
 
     <TextView
+        android:id="@+id/details_user_rating_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User Rating:"
-        android:id="@+id/details_user_rating_label"
-        android:paddingLeft="5dp"
-        android:paddingTop="5dp"
+        android:text="@string/user_rating_label"
+        android:textSize="18sp"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
         android:layout_below="@+id/details_release_date"
         android:layout_toRightOf="@+id/details_imageview" />
 
     <ImageView
+        android:id="@+id/testImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/testImageView"
         android:layout_alignTop="@+id/details_user_rating_label"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
