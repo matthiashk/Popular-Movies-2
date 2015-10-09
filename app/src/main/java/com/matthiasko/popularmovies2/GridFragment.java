@@ -94,8 +94,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         mGridview = (GridView) view.findViewById(R.id.gridview);
         mGridview.setAdapter(mImageAdapter);
 
-        //System.out.println("onCreateView");
-
         return view;
     }
 
@@ -110,15 +108,11 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        // save the position of the gridview, so we can restore it on rotation
         //System.out.println("onSaveInstanceState ----------");
-
         //System.out.println("onSaveInstanceState - mScrollPosition = " + mScrollPosition);
-
         outState.putInt("savedPosition", mScrollPosition);
-
     }
-
-
 
     @Override
     public void onAttach(Activity activity) {
@@ -179,10 +173,8 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         File pm2Db = getActivity().getDatabasePath("movies.db");
 
         if (pm2Db.exists()) {
-
             //Log.v("GRIDFRAGMENT", "db found. load from db...");
             // load from cursor here?
-
         } else {
 
             FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity());
@@ -209,8 +201,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             // this fixed issues with displaying images after rotation change
             getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
         }*/
-
-
     }
 
     @Override
@@ -410,9 +400,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        // read sortOrder and make if/else based on sortOrder
-        // 2 options are stored as popularity.desc and vote_count.desc
-
+        // setup to display movies in the gridview based on the sort order
         String sortOrder = null;
         String selection = null;
 

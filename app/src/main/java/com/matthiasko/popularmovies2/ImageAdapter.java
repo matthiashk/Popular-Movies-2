@@ -37,6 +37,7 @@ public class ImageAdapter extends CursorAdapter {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         viewHolder.posterView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
+        // create full url for the poster needed from tmdb.org
         String baseURL = "http://image.tmdb.org/t/p/";
         String thumbSize = "w185";
         String posterPath = null;

@@ -85,6 +85,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
 
     public void onArticleSelected(Bundle bundle) {
 
+        // depending on the orientation, show the detail fragment or just update the data
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
 
@@ -108,7 +109,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
         if (detailFragment != null) {
             // send bundle from GridFragment to our DetailFragment
             detailFragment.updateArticleView(bundle);
-
         }
     }
 

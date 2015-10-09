@@ -23,7 +23,9 @@ public class FetchFavoriteTask  extends AsyncTask<String, Void, Void> {
     private String mUrl;
     private int mMovieId;
 
-    private byte[] getLogoImage(String url){
+    // get movie poster image from url and store into byte array, so we can store the image
+    // in the database as a blob type and retrieve later
+    private byte[] getMoviePosterImage(String url){
         try {
             URL imageUrl = new URL(url);
             URLConnection ucon = imageUrl.openConnection();
@@ -51,8 +53,8 @@ public class FetchFavoriteTask  extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... params) {
 
-        // get the value passed from caller DetailFragment
-        // FetchFavoriteTask.execute(mPosterUrl); <- mPosterUrl
+        // get the movie poster image and store in database
+        // also change favorite status to true
         if (params.length == 0) {
             return null;
         }
@@ -62,8 +64,8 @@ public class FetchFavoriteTask  extends AsyncTask<String, Void, Void> {
         // convert string id to int
         mMovieId = Integer.parseInt(movieId);
 
-        // call getLogoImage method to set byte array code
-        byte[] imageInByte = getLogoImage(mUrl);
+        // call getMoviePosterImage method to set byte array code
+        byte[] imageInByte = getMoviePosterImage(mUrl);
 
         ContentValues movieValues = new ContentValues();
         movieValues.put(MovieContract.MovieEntry.COLUMN_IMAGE, imageInByte);

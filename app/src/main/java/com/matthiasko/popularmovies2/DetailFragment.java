@@ -92,7 +92,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        //System.out.println("onCreate ----------");
     }
 
     @Override
@@ -111,8 +110,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         // check if the movie is a favorite and change menu icon if already favorited
-
-        //System.out.println("onPrepareOptionsMenu");
 
         if (mFavorite == 0) {
             MenuItem favoriteButton = menu.findItem(R.id.action_favorite);
@@ -166,15 +163,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        //System.out.println("onCreateView ----------");
-
         /* called on start and on rotation */
         // container is null here b/c we are loading from xml?
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
 
         if (savedInstanceState == null) {
-            //System.out.println("savedInstanceState IS NULL");
-
             //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
         } else {
 
@@ -188,37 +181,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mUserRating = movie.userRating;
             mFavorite = movie.favoriteButtonState;
 
-
-            /*
-            mTrailersNameArrayCopy = movie.trailerNames;
-            mTrailersUrlArrayCopy = movie.trailerUrls;
-
-            mReviewsNameArrayCopy = movie.reviewNames;
-            mReviewsContentArrayCopy = movie.reviewContent;
-            */
             ((TextView) view.findViewById(R.id.details_movie_title))
                     .setText(movie.title);
 
             ((TextView) view.findViewById(R.id.details_plot))
                     .setText(movie.plot);
 
-            // allow user to scroll the view containing the plot synopsis
             ((TextView) view.findViewById(R.id.details_plot))
                     .setMovementMethod(new ScrollingMovementMethod());
 
-            // format the user rating, add '/10'
             String formattedUserRating = String.format("%.1f", movie.userRating) + "/10";
 
             ((TextView) view.findViewById(R.id.details_user_rating))
                     .setText(formattedUserRating);
 
-            // extract the year from the release date string
-            //String movieYear = releaseDate.substring(0, 4);
             ((TextView) view.findViewById(R.id.details_release_date))
                     .setText(movie.releaseDate);
 
-            // showing thumbnail poster
-            // construct url for the full posterpath
             String baseURL = "http://image.tmdb.org/t/p/";
             String thumbSize = "w185";
             String posterURL = null;
@@ -231,10 +210,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     .resize(600, 900)
                     .into(imageView);
 
-            //removePreviousElements(movie.buttonsList, movie.reviewsList, view);
-
-            //System.out.println("onCreateView - movie.trailerNames = " + movie.trailerNames.toString());
-
             createTrailerElements(movie.trailerNames, movie.trailerUrls, view);
             createReviewElements(movie.reviewNames, movie.reviewContent);
         }
@@ -244,22 +219,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //System.out.println("onViewCreated ----------");
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        //System.out.println("onActivityCreated ----------");
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        //System.out.println("onCreateLoader ----------------------------------------");
 
         mTrailersNameArray.clear();
         mTrailersUrlArray.clear();
-
         mReviewsNameArray.clear();
         mReviewsContentArray.clear();
 
@@ -283,14 +254,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
+        // this block will get called multiple times
+        // this will get called by FetchFavoriteTask also
+
         if (mTrailersNameArray != null) {
-
             removePreviousElements(mButtonList, mTextViewList, getView());
-            //System.out.println("mTrailersNameArray IS NOT NULL - REMOVE BUTTONS HERE");
         }
-
-
-        //System.out.println("onLoadFinished ----------");
 
         if (data != null && data.moveToFirst()) {
 
@@ -347,7 +316,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         .resize(600, 900)
                         .into(imageView);
 
-                // is a favorite, so fetch image from db
+            // is a favorite, so fetch image from db
             } else if (mFavorite == 1) {
 
                 byte[] imageFromDB = data.getBlob(COL_IMAGE);
@@ -377,10 +346,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         .resize(600, 900)
                         .into(imageView);
             }
-
-            // call method to remove buttons and reviews that were
-            // previously created. we need to call this also in oncreateview.
-            //removePreviousElements(mButtonList, mTextViewList, getView());
 
             try {
                 // dont populate array if the column is null
@@ -436,7 +401,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         }
 
                         if (i % 2 == 0) {
-                            String stringValue = items.optString(i);  // strings in the array
+                            String stringValue = items.optString(i);
                             mReviewsNameArray.add(stringValue);
                         }
                     }
@@ -445,30 +410,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 e.printStackTrace();
             }
 
-
-
-
-            // this block will get called multiple times
-            // this will get called by FetchFavoriteTask also
-
             createTrailerElements(mTrailersNameArray, mTrailersUrlArray, getView());
             createReviewElements(mReviewsNameArray, mReviewsContentArray);
-
         }
     }
 
     public void createTrailerElements(ArrayList<String> trailerNames, ArrayList<String> trailerUrls, View view) {
         // create trailer links here
         if (trailerNames != null) {
-
-            //returns base view of the fragment
-            /*
-            View view = getView();
-            if ( view == null)
-                return;
-            if ( !(view instanceof ViewGroup)){
-                return;
-            }*/
 
             mLastButtonId = trailerUrls.size(); // we need this to position the review textviews
 
@@ -479,12 +428,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             for (int i = 0; i < trailerUrls.size(); i++) {
                 mButtonList.add(new Button(getActivity()));
             }
-
-            //System.out.println("trailerUrls.size() = " + trailerUrls.size());
-
-            //System.out.println("createTrailerElements - mButtonList.size() = " + mButtonList.size());
-            //System.out.println("createTrailerElements - trailerUrls.size() = " + trailerUrls.size());
-
 
             int z = 1; // use this to set button ids
 
@@ -550,40 +493,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 z++;
             }
         }
-
-
-        /*
-        // this should run only once, since onloadfinished will run multiple times
-        if(!alreadyExecuted) {
-
-
-
-            //    the arraylists here are becoming empty on rotation...
-
-
-            System.out.println("ONLOADFINISHED ---------");
-            for (String item : mTrailersNameArray) mTrailersNameArrayCopy.add(item);
-            for (String item : mTrailersUrlArray) mTrailersUrlArrayCopy.add(item);
-            alreadyExecuted = true;
-
-            System.out.println("mTrailersNameArray = " + mTrailersNameArray.toString());
-            System.out.println("mTrailersNameArrayCopy = " + mTrailersNameArrayCopy.toString());
-        }*/
-
-        //mTrailersNameArray.clear();
-        //mTrailersUrlArray.clear();
     }
 
     public void createReviewElements(ArrayList<String> reviewNames, ArrayList<String> reviewContent) {
         /* create review textviews */
 
-
-
-        //System.out.println("createReviewElements mButtonList.size() = " + mButtonList.size());
-
         // this will match if no reviews
         if (reviewNames == null) {
-
             //System.out.println("SKIPPING REVIEWS CREATION");
             // skip review creation code
         } else {
@@ -593,8 +509,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             for (int i = 0; i < reviewNames.size(); i++) {
                 mTextViewList.add(new TextView(getActivity()));
             }
-
-            //System.out.println("createReviewElements - mTextViewList.size() = " + mTextViewList.size());
 
             int a = 1000; // use this to set textview ids ... ids must be unique!
 
@@ -610,7 +524,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 mTextViewList.get(i).setTextColor(getResources().getColor(R.color.darkGrey));
                 mTextViewList.get(i).setBackground(getResources().getDrawable(R.drawable.borderbottom));
                 //mTextViewList.get(i).setBackground(getResources().getDrawable(android.R.drawable.dialog_holo_light_frame));
-
 
                 // add reviewer name + newline + review content
                 String newLine = System.getProperty("line.separator");
@@ -646,22 +559,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // we are calling this from oncreateview and onloadfinished
 
         if (buttonList == null) {
-
             //System.out.println("removePreviousElements - mButtonList IS NULL");
-
         } else {
-
-            //System.out.println("removePreviousElements - removing buttons");
-            //System.out.println("removePreviousElements - buttonList.size() = " + buttonList.size());
-
-            //System.out.println("removePreviousElements");
 
             mRelativeLayout = (RelativeLayout) view.findViewById(R.id.details_layout);
             // remove buttons from view
             for (int i = 0; i < buttonList.size(); i++) {
                 mRelativeLayout.removeView(buttonList.get(i));
             }
-            //mButtonList.clear(); // null here?
         }
         // remove previously created textviews of reviews from view
         if (textViewList == null) {
@@ -672,7 +577,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             for (int i = 0; i < textViewList.size(); i++) {
                 mRelativeLayout.removeView(textViewList.get(i));
             }
-            //mTextViewList.clear();
         }
     }
 
@@ -694,9 +598,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         /* put movie details in bundle and reload in oncreateview */
 
         //System.out.println("onSaveInstanceState ---------");
-
         //System.out.println("onSaveInstanceState - mButtonList.size() = " + mButtonList.size());
-
         //System.out.println("onSaveInstanceState - mTitle = " + mTitle);
         //System.out.println("onSaveInstanceState - mTrailersNameArray = " + mTrailersNameArray.toString());
 

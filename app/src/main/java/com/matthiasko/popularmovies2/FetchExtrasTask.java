@@ -39,6 +39,8 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
     }
 
     // send result to onpostexecute
+    // get trailer and review info from json
+    // and store in our database
     private void getMovieDataFromJson(String extrasJsonStr)
             throws JSONException {
 
@@ -79,10 +81,10 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
 
                 JSONObject objectInArray = reviewResults.getJSONObject(i);
 
-                String rId = objectInArray.getString("id");
+                //String rId = objectInArray.getString("id");
                 String rAuthor = objectInArray.getString("author");
                 String rContent = objectInArray.getString("content");
-                String rUrl = objectInArray.getString("url");
+                //String rUrl = objectInArray.getString("url");
 
                 reviewsArray.add(rAuthor);
                 reviewsArray.add(rContent);
@@ -103,7 +105,7 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
             String selection = MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=" + mMovieId;
             String[] selectionArgs = null;
 
-            // update movie entry, adding image and favorite status
+            // update movie entry, adding image and favorite status to database
             mContext.getContentResolver().update(MovieContract.MovieEntry.CONTENT_URI, movieValues,
                     selection, selectionArgs);
         }
@@ -115,6 +117,7 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... params) {
 
+        // create url request using the movie id and send result to getMovieDataFromJson method
         if (params.length == 0) {
             return null;
         }
@@ -194,6 +197,7 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
     @Override
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
+        // let the detail fragment know the data was fetched
         fetchExtrasResponse.onSuccess();
     }
 }

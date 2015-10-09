@@ -5,9 +5,7 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 
-/** Class for storing movie data
- *
- */
+/* Class for storing movie data */
 public class TmdbMovie implements Parcelable {
 
     long id;
