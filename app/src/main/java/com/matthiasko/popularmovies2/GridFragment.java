@@ -59,22 +59,19 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     private static final int DETAIL_LOADER = 0;
 
     public static final int COL_ID = 0;
-    public static final int COL_MOVIE_TITLE = 1;
+    //public static final int COL_MOVIE_TITLE = 1;
     public static final int COL_MOVIE_POSTER_PATH = 2;
-    public static final int COL_MOVIE_PLOT = 3;
-    public static final int COL_MOVIE_USER_RATING = 4;
-    public static final int COL_MOVIE_RELEASE_DATE = 5;
-    public static final int COL_MOVIE_POPULARITY = 6;
-    public static final int COL_MOVIE_VOTE_COUNT = 7;
+    //public static final int COL_MOVIE_PLOT = 3;
+    //public static final int COL_MOVIE_USER_RATING = 4;
+    //public static final int COL_MOVIE_RELEASE_DATE = 5;
+    //public static final int COL_MOVIE_POPULARITY = 6;
+    //public static final int COL_MOVIE_VOTE_COUNT = 7;
     public static final int COL_MOVIE_ID = 8;
 
     public GridFragment() {}
 
     private Context mGridContext;
     private int mScrollPosition;
-
-    /* Replace API_KEY here. Also replace API_KEY in FetchExtrasTask. */
-    private final String API_KEY = "aa336466223f0deecbe36bf1aafd76d3";
 
     public interface OnMovieSelectedListener {
         public void onArticleSelected(Bundle bundle);
@@ -162,24 +159,18 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         // use this to detect preference changes instead...
         sharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
-        String sortOrder = sharedPrefs.getString(
+        mSortOrder = sharedPrefs.getString(
                 getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_sort_order_default));
 
-        mSortOrder = sortOrder;
         //System.out.println("sortOrder = " + sortOrder);
 
         // check if db exists
         File pm2Db = getActivity().getDatabasePath("movies.db");
 
-        if (pm2Db.exists()) {
-            //Log.v("GRIDFRAGMENT", "db found. load from db...");
-            // load from cursor here?
-        } else {
-
+        if (!pm2Db.exists()) {
             FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity());
             fetchMoviesTask.execute();
-            //Log.v("GRIDFRAGMENT", "no db found. fetching...");
         }
 
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
@@ -295,6 +286,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                     cVVector.add(movieValues);
                 }
 
+
                 int inserted = 0;
                 // add to database
                 if (cVVector.size() > 0) {
@@ -302,6 +294,8 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                     cVVector.toArray(cvArray);
                     inserted = mContext.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI, cvArray);
                 }
+
+
             }
 
             catch(JSONException e){
@@ -317,7 +311,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             BufferedReader reader = null;
 
             // Will contain the raw JSON response as a string.
-            String moviesJsonStr = null;
+            String moviesJsonStr;
 
             // Get sort order from preferences.
             SharedPreferences sharedPrefs =
@@ -338,7 +332,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                         .buildUpon()
                         .appendQueryParameter(SORT_BY_PARAM, sortOrder)
                         .appendQueryParameter(VOTE_COUNT, "75")
-                        .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                        .appendQueryParameter(API_KEY_PARAM, mGridContext.getResources().getString(R.string.api_key))
                         .build();
 
                 URL url = new URL(builtUri.toString());

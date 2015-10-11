@@ -30,8 +30,9 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
     private final Context mContext;
     private String mMovieId;
 
-    /* Replace API_KEY here. Also replace API_KEY in GridFragment. */
-    private final String API_KEY = "aa336466223f0deecbe36bf1aafd76d3";
+    public interface FetchExtrasResponse {
+        void onSuccess();
+    }
 
     public FetchExtrasTask(Context context, FetchExtrasResponse fetchExtrasResponse) {
         mContext = context;
@@ -44,8 +45,8 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
     private void getMovieDataFromJson(String extrasJsonStr)
             throws JSONException {
 
-        ArrayList<String> trailersArray = new ArrayList<String>();
-        ArrayList<String> reviewsArray = new ArrayList<String>();
+        ArrayList<String> trailersArray = new ArrayList<>();
+        ArrayList<String> reviewsArray = new ArrayList<>();
 
         try {
 
@@ -61,9 +62,9 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
                 JSONObject objectInArray = youtubeTrailers.getJSONObject(i);
 
                 String ytName = objectInArray.getString("name");
-                String ytSize = objectInArray.getString("size");
+                //String ytSize = objectInArray.getString("size");
                 String ytSource = objectInArray.getString("source");
-                String ytType = objectInArray.getString("type");
+                //String ytType = objectInArray.getString("type");
 
                 final Uri builtUri = Uri.parse(YOUTUBE_BASE_URL)
                         .buildUpon()
@@ -103,11 +104,10 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
             movieValues.put(MovieContract.MovieEntry.COLUMN_REVIEWS, reviewsArrayList);
 
             String selection = MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=" + mMovieId;
-            String[] selectionArgs = null;
 
             // update movie entry, adding image and favorite status to database
             mContext.getContentResolver().update(MovieContract.MovieEntry.CONTENT_URI, movieValues,
-                    selection, selectionArgs);
+                    selection, null);
         }
         catch(JSONException e){
             e.printStackTrace();
@@ -127,18 +127,18 @@ public class FetchExtrasTask extends AsyncTask<String, Void, Void> {
         BufferedReader reader = null;
 
         // Will contain the raw JSON response as a string.
-        String moviesJsonStr = null;
+        String moviesJsonStr;
 
         try {
             final String MOVIE_BASE_URL = "http://api.themoviedb.org/3/movie?";
             final String API_KEY_PARAM = "api_key";
             final String APPEND_TO_RESPONSE = "append_to_response";
 
-            // TODO: REMOVE api key before submitting project!!!
+
             Uri builtUri = Uri.parse(MOVIE_BASE_URL)
                     .buildUpon()
                     .appendPath(mMovieId)
-                    .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                    .appendQueryParameter(API_KEY_PARAM, mContext.getResources().getString(R.string.api_key))
                     .appendQueryParameter(APPEND_TO_RESPONSE, "trailers,reviews")
                     .build();
 

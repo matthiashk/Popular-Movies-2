@@ -22,6 +22,7 @@
     <string name="release_date_label">Release Date:</string>
     <string name="user_rating_label">User Rating:</string>
 
-
+    <!-- API KEY -->
+    <string name="api_key">aa336466223f0deecbe36bf1aafd76d3</string>
 
 </resources>

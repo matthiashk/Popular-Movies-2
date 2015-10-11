@@ -8,22 +8,22 @@ import java.util.ArrayList;
 /* Class for storing movie data */
 public class TmdbMovie implements Parcelable {
 
-    long id;
-    String title;
-    String posterPath;
-    String plot;
-    double userRating;
-    String releaseDate;
-    int popularity;
-    int voteCount;
-    int movieId;
+    private long id;
+    private String title;
+    private String posterPath;
+    private String plot;
+    private double userRating;
+    private String releaseDate;
+    private int popularity;
+    private int voteCount;
+    private int movieId;
 
-    ArrayList<String> trailerNames;
-    ArrayList<String> trailerUrls;
-    ArrayList<String> reviewNames;
-    ArrayList<String> reviewContent;
+    private ArrayList<String> trailerNames;
+    private ArrayList<String> trailerUrls;
+    private ArrayList<String> reviewNames;
+    private ArrayList<String> reviewContent;
 
-    int favoriteButtonState;
+    private int favoriteButtonState;
 
     public TmdbMovie() {
     }
@@ -74,30 +74,6 @@ public class TmdbMovie implements Parcelable {
 
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
-    }
-
-    public int getPopularity() {
-        return popularity;
-    }
-
-    public void setPopularity(int popularity) {
-        this.popularity = popularity;
-    }
-
-    public int getVoteCount() {
-        return voteCount;
-    }
-
-    public void setVoteCount(int voteCount) {
-        this.voteCount = voteCount;
-    }
-
-    public int getMovieId() {
-        return movieId;
-    }
-
-    public void setMovieId(int movieId) {
-        this.movieId = movieId;
     }
 
     public void setTrailerNames(ArrayList<String> trailerNames) {
@@ -152,10 +128,10 @@ public class TmdbMovie implements Parcelable {
         dest.writeInt(popularity);
         dest.writeInt(voteCount);
         dest.writeInt(movieId);
-        dest.writeList(trailerNames);
-        dest.writeList(trailerUrls);
-        dest.writeList(reviewNames);
-        dest.writeList(reviewContent);
+        dest.writeStringList(trailerNames);
+        dest.writeStringList(trailerUrls);
+        dest.writeStringList(reviewNames);
+        dest.writeStringList(reviewContent);
         dest.writeInt(favoriteButtonState);
     }
 
@@ -180,10 +156,10 @@ public class TmdbMovie implements Parcelable {
         popularity = source.readInt();
         voteCount = source.readInt();
         movieId = source.readInt();
-        trailerNames = source.readArrayList(null);
-        trailerUrls = source.readArrayList(null);
-        reviewNames = source.readArrayList(null);
-        reviewContent = source.readArrayList(null);
+        trailerNames = source.createStringArrayList();
+        trailerUrls = source.createStringArrayList();
+        reviewNames = source.createStringArrayList();
+        reviewContent = source.createStringArrayList();
         favoriteButtonState = source.readInt();
     }
 }

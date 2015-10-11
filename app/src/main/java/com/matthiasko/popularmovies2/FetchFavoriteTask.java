@@ -20,8 +20,8 @@ import java.net.URLConnection;
 public class FetchFavoriteTask  extends AsyncTask<String, Void, Void> {
 
     private final Context mContext;
-    private String mUrl;
-    private int mMovieId;
+    String mUrl;
+    int mMovieId;
 
     // get movie poster image from url and store into byte array, so we can store the image
     // in the database as a blob type and retrieve later
@@ -34,7 +34,7 @@ public class FetchFavoriteTask  extends AsyncTask<String, Void, Void> {
             BufferedInputStream bis = new BufferedInputStream(is);
 
             ByteArrayBuffer baf = new ByteArrayBuffer(500);
-            int current = 0;
+            int current;
             while ((current = bis.read()) != -1) {
                 baf.append((byte) current);
             }
@@ -72,11 +72,10 @@ public class FetchFavoriteTask  extends AsyncTask<String, Void, Void> {
         movieValues.put(MovieContract.MovieEntry.COLUMN_FAVORITE, 1); // change favorite to true
 
         String selection = MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=" + mMovieId;
-        String[] selectionArgs = null;
 
         // update movie entry, adding image and favorite status
         mContext.getContentResolver().update(MovieContract.MovieEntry.CONTENT_URI, movieValues,
-                selection, selectionArgs);
+                selection, null);
 
         return null;
     }

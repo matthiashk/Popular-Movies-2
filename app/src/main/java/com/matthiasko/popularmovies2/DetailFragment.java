@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +42,7 @@ import java.util.List;
  * Created by matthiasko on 9/19/15.
  */
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
-        FetchExtrasResponse {
+        FetchExtrasTask.FetchExtrasResponse {
 
     private Uri mMovieUri;
 
@@ -51,14 +52,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private static final int X_DETAIL_LOADER = 0;
 
-    public static final int COL_ID = 0;
+    //public static final int COL_ID = 0;
     public static final int COL_MOVIE_TITLE = 1;
     public static final int COL_MOVIE_POSTER_PATH = 2;
     public static final int COL_MOVIE_PLOT = 3;
     public static final int COL_MOVIE_USER_RATING = 4;
     public static final int COL_MOVIE_RELEASE_DATE = 5;
-    public static final int COL_MOVIE_POPULARITY = 6;
-    public static final int COL_MOVIE_VOTE_COUNT = 7;
+    //public static final int COL_MOVIE_POPULARITY = 6;
+    //public static final int COL_MOVIE_VOTE_COUNT = 7;
     public static final int COL_MOVIE_ID = 8;
     public static final int COL_FAVORITE = 9;
     public static final int COL_IMAGE = 10;
@@ -167,41 +168,39 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // container is null here b/c we are loading from xml?
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
 
-        if (savedInstanceState == null) {
-            //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
-        } else {
+        if (savedInstanceState != null) {
 
             TmdbMovie movie = savedInstanceState.getParcelable("movie");
 
             // set variables here again, otherwise they will be null
-            mTitle = movie.title;
-            mPlot = movie.plot;
-            mReleaseDate = movie.releaseDate;
-            mPosterPath = movie.posterPath;
-            mUserRating = movie.userRating;
-            mFavorite = movie.favoriteButtonState;
+            mTitle = movie.getTitle();
+            mPlot = movie.getPlot();
+            mReleaseDate = movie.getReleaseDate();
+            mPosterPath = movie.getPosterPath();
+            mUserRating = movie.getUserRating();
+            mFavorite = movie.getFavoriteButtonState();
 
             ((TextView) view.findViewById(R.id.details_movie_title))
-                    .setText(movie.title);
+                    .setText(movie.getTitle());
 
             ((TextView) view.findViewById(R.id.details_plot))
-                    .setText(movie.plot);
+                    .setText(movie.getPlot());
 
             ((TextView) view.findViewById(R.id.details_plot))
                     .setMovementMethod(new ScrollingMovementMethod());
 
-            String formattedUserRating = String.format("%.1f", movie.userRating) + "/10";
+            String formattedUserRating = String.format("%.1f", movie.getUserRating()) + "/10";
 
             ((TextView) view.findViewById(R.id.details_user_rating))
                     .setText(formattedUserRating);
 
             ((TextView) view.findViewById(R.id.details_release_date))
-                    .setText(movie.releaseDate);
+                    .setText(movie.getReleaseDate());
 
             String baseURL = "http://image.tmdb.org/t/p/";
             String thumbSize = "w185";
-            String posterURL = null;
-            posterURL = baseURL + thumbSize + movie.posterPath;
+            String posterURL;
+            posterURL = baseURL + thumbSize + movie.getPosterPath();
 
             ImageView imageView = ((ImageView) view.findViewById(R.id.details_imageview));
 
@@ -210,8 +209,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     .resize(600, 900)
                     .into(imageView);
 
-            createTrailerElements(movie.trailerNames, movie.trailerUrls, view);
-            createReviewElements(movie.reviewNames, movie.reviewContent);
+            createTrailerElements(movie.getTrailerNames(), movie.getTrailerUrls(), view);
+            createReviewElements(movie.getReviewNames(), movie.getReviewContent());
         }
         return view;
     }
@@ -351,9 +350,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 // dont populate array if the column is null
                 // the column WILL be null since onloadfinished is called
                 // before the column is updated
-                if (data.getString(COL_TRAILERS) == null) {
-                    //System.out.println("NULL COL_TRAILERS");
-                } else {
+                if (data.getString(COL_TRAILERS) != null) {
 
                     mTrailersUrlArray = new ArrayList<>();
                     mTrailersNameArray = new ArrayList<>();
@@ -384,8 +381,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 // dont populate array if the column is null
                 // the column WILL be null since onloadfinished is called
                 // before the column is updated
-                if (data.getString(COL_REVIEWS) == null) {
-                } else {
+                if (data.getString(COL_REVIEWS) != null) {
 
                     mReviewsContentArray = new ArrayList<>();
                     mReviewsNameArray = new ArrayList<>();
@@ -415,7 +411,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-    public void createTrailerElements(ArrayList<String> trailerNames, ArrayList<String> trailerUrls, View view) {
+    public void createTrailerElements(ArrayList<String> trailerNames, ArrayList<String> trailerUrls, final View view) {
         // create trailer links here
         if (trailerNames != null) {
 
@@ -499,10 +495,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         /* create review textviews */
 
         // this will match if no reviews
-        if (reviewNames == null) {
-            //System.out.println("SKIPPING REVIEWS CREATION");
-            // skip review creation code
-        } else {
+        if (reviewNames != null) {
+
             // process reviews here
             // setup textviews depending on how many reviews there are
             mTextViewList = new ArrayList<TextView>();
@@ -558,9 +552,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // here is where we remove the previously created buttons from the view
         // we are calling this from oncreateview and onloadfinished
 
-        if (buttonList == null) {
-            //System.out.println("removePreviousElements - mButtonList IS NULL");
-        } else {
+        if (buttonList != null) {
 
             mRelativeLayout = (RelativeLayout) view.findViewById(R.id.details_layout);
             // remove buttons from view
@@ -569,9 +561,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             }
         }
         // remove previously created textviews of reviews from view
-        if (textViewList == null) {
-
-        } else {
+        if (textViewList != null) {
 
             mRelativeLayout = (RelativeLayout) view.findViewById(R.id.details_layout);
             for (int i = 0; i < textViewList.size(); i++) {
@@ -620,6 +610,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     // get result from fetchextrastask
     @Override
     public void onSuccess() {
+
+        if (getView() != null) {
+            // have the detail fragment scroll to top on click
+            getView().findViewById(R.id.details_scrollview).post(new Runnable() {
+                @Override
+                public void run() {
+                    ((ScrollView) getView().findViewById(R.id.details_scrollview)).
+                            smoothScrollTo(0, (getView().findViewById(R.id.detail_fragment)).getTop());
+                }
+            });
+
+        }
+
         getLoaderManager().restartLoader(X_DETAIL_LOADER, null, this);
     }
 }

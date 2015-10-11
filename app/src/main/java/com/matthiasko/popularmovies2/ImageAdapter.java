@@ -40,8 +40,8 @@ public class ImageAdapter extends CursorAdapter {
         // create full url for the poster needed from tmdb.org
         String baseURL = "http://image.tmdb.org/t/p/";
         String thumbSize = "w185";
-        String posterPath = null;
-        String finalURL = null;
+        String posterPath;
+        String finalURL;
 
         posterPath = cursor.getString(GridFragment.COL_MOVIE_POSTER_PATH);
         finalURL = baseURL + thumbSize + posterPath;
