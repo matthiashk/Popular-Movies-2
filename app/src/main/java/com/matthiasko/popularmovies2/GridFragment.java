@@ -51,8 +51,9 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     public static final Uri CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
 
+    // this PROJECTION is also used by ImageAdapter to get some of the values.
     private static final String[] PROJECTION = new String[] { "_id", "title", "poster_path", "plot",
-            "user_rating", "release_date", "popularity", "vote_count", "movie_id"};
+            "user_rating", "release_date", "popularity", "vote_count", "movie_id", "favorite", "image"};
 
     OnMovieSelectedListener mCallback;
 
@@ -67,6 +68,8 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     //public static final int COL_MOVIE_POPULARITY = 6;
     //public static final int COL_MOVIE_VOTE_COUNT = 7;
     public static final int COL_MOVIE_ID = 8;
+    public static final int COL_FAVORITE = 9;
+    public static final int COL_IMAGE = 10;
 
     public GridFragment() {}
 
@@ -168,7 +171,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         // check if db exists
         File pm2Db = getActivity().getDatabasePath("movies.db");
 
-        if (!pm2Db.exists()) {
+        if (!pm2Db.exists()) { // if no db found, fetch from internet
             FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity());
             fetchMoviesTask.execute();
         }

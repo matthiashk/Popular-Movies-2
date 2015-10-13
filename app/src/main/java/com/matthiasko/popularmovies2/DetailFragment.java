@@ -89,6 +89,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private RelativeLayout mRelativeLayout;
 
+    private byte[] mMovieImage;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -180,6 +182,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mUserRating = movie.getUserRating();
             mFavorite = movie.getFavoriteButtonState();
 
+            mMovieId = String.valueOf(movie.getMovieId());
+
+
             ((TextView) view.findViewById(R.id.details_movie_title))
                     .setText(movie.getTitle());
 
@@ -204,10 +209,58 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             ImageView imageView = ((ImageView) view.findViewById(R.id.details_imageview));
 
-            Picasso.with(getActivity())
+            // check if the movie is a favorite before displaying image
+            // not a favorite, so fetch image from internet
+            if (mFavorite == 0) {
+
+                Picasso.with(getActivity())
+                        .load(posterURL)
+                        .placeholder(R.drawable.picasso_placeholder)
+                        .error(R.drawable.picasso_error_placeholder)
+                        .resize(600, 900)
+                        .into(imageView);
+
+                // is a favorite, so fetch image from db
+            } else if (mFavorite == 1) {
+
+                //System.out.println("fetching image from db = " + movieIdint);
+
+                byte[] movieImage = movie.getMovieImage();
+
+                // create file to save the image in.
+                // use movie id as filename
+                File file = new File(getActivity().getFilesDir(), mMovieId);
+
+                // check if the file is already on disk
+                // if it is, we dont need to write to file, just load it
+                if (file.isFile()) {
+                } else {
+                    // save image from byte array to file
+                    try {
+                        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                        bos.write(movieImage);
+                        bos.flush();
+                        bos.close();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Picasso.with(getActivity())
+                        .load(file)
+                        .placeholder(R.drawable.picasso_placeholder)
+                        .error(R.drawable.picasso_error_placeholder)
+                        .resize(600, 900)
+                        .into(imageView);
+            }
+
+            /*Picasso.with(getActivity())
                     .load(posterURL)
+                    .placeholder(R.drawable.picasso_placeholder)
+                    .error(R.drawable.picasso_error_placeholder)
                     .resize(600, 900)
-                    .into(imageView);
+                    .into(imageView);*/
 
             createTrailerElements(movie.getTrailerNames(), movie.getTrailerUrls(), view);
             createReviewElements(movie.getReviewNames(), movie.getReviewContent());
@@ -255,7 +308,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         // this block will get called multiple times
         // this will get called by FetchFavoriteTask also
-
         if (mTrailersNameArray != null) {
             removePreviousElements(mButtonList, mTextViewList, getView());
         }
@@ -318,7 +370,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             // is a favorite, so fetch image from db
             } else if (mFavorite == 1) {
 
-                byte[] imageFromDB = data.getBlob(COL_IMAGE);
+                //System.out.println("onLoadFinished - mMovieId = "+ mMovieId);
+
+                mMovieImage = data.getBlob(COL_IMAGE);
 
                 // create file to save the image in.
                 // use movie id as filename
@@ -331,7 +385,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     // save image from byte array to file
                     try {
                         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                        bos.write(imageFromDB);
+                        bos.write(mMovieImage);
                         bos.flush();
                         bos.close();
 
@@ -342,6 +396,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 Picasso.with(getActivity())
                         .load(file)
+                        .placeholder(R.drawable.picasso_placeholder)
+                        .error(R.drawable.picasso_error_placeholder)
                         .resize(600, 900)
                         .into(imageView);
             }
@@ -603,6 +659,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         movie.setReviewNames(mReviewsNameArray);
         movie.setReviewContent(mReviewsContentArray);
         movie.setFavoriteButtonState(mFavorite);
+
+        // if the movie is a favorite, save the image and id so we can recreate on rotation
+        if (mFavorite == 1) {
+
+            //System.out.println("onSaveInstanceState - mMovieId = " + mMovieId);
+
+            movie.setMovieId(Integer.parseInt(mMovieId));
+            movie.setMovieImage(mMovieImage);
+        }
 
         outState.putParcelable("movie", movie);
     }

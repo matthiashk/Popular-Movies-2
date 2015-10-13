@@ -10,6 +10,11 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class ImageAdapter extends CursorAdapter {
 
     public static class ViewHolder {
@@ -34,6 +39,9 @@ public class ImageAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+
+        int favorite = cursor.getInt(GridFragment.COL_FAVORITE);
+
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         viewHolder.posterView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
@@ -46,9 +54,58 @@ public class ImageAdapter extends CursorAdapter {
         posterPath = cursor.getString(GridFragment.COL_MOVIE_POSTER_PATH);
         finalURL = baseURL + thumbSize + posterPath;
 
+        // check if the movie is a favorite before displaying image
+        // not a favorite, so fetch image from internet
+        if (favorite == 0) {
+
+            Picasso.with(context)
+                    .load(finalURL)
+                    .resize(600, 900)
+                    .into(viewHolder.posterView);
+
+            // is a favorite, so fetch image from db
+        } else if (favorite == 1) {
+
+            byte[] imageFromDB = cursor.getBlob(GridFragment.COL_IMAGE);
+
+            // create file to save the image in.
+            // use movie id as filename
+            File file = new File(context.getFilesDir(), cursor.getString(GridFragment.COL_MOVIE_ID));
+
+            //String movieId = cursor.getString(GridFragment.COL_MOVIE_ID);
+            //System.out.println("movieId = " + movieId);
+
+            // check if the file is already on disk
+            // if it is, we dont need to write to file, just load it
+            if (file.isFile()) {
+            } else {
+                // save image from byte array to file
+                try {
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                    bos.write(imageFromDB);
+                    bos.flush();
+                    bos.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Picasso.with(context)
+                    .load(file)
+                    .placeholder(R.drawable.picasso_placeholder)
+                    .error(R.drawable.picasso_error_placeholder)
+                    .resize(600, 900)
+                    .into(viewHolder.posterView);
+        }
+
+        /*
         Picasso.with(context)
                 .load(finalURL)
+                .placeholder(R.drawable.picasso_placeholder)
+                .error(R.drawable.picasso_error_placeholder)
                 .resize(600, 900)
                 .into(viewHolder.posterView);
+                */
     }
 }

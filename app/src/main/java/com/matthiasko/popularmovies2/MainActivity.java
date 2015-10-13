@@ -18,9 +18,17 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
 
         setContentView(R.layout.activity_main);
 
+        // we need to hide detail fragment because it will auto load with the activity_main.xml...
+        // BUT we should only hide if we are in portrait mode and detail fragment is empty
+
         // hide the detail fragment in portrait mode
+
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
+
+
+        //System.out.println("detailFragment movie title = " + detailFragment.getTitle());
+
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -29,6 +37,8 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
             fragmentTransaction.hide(detailFragment);
             fragmentTransaction.commit();
         }
+
+
 
         // dont show landscape mode on phones
         if(getResources().getBoolean(R.bool.portrait_only)){
@@ -42,6 +52,8 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

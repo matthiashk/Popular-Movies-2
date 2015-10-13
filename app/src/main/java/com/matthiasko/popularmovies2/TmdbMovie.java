@@ -25,6 +25,8 @@ public class TmdbMovie implements Parcelable {
 
     private int favoriteButtonState;
 
+    private byte[] movieImage;
+
     public TmdbMovie() {
     }
 
@@ -110,6 +112,22 @@ public class TmdbMovie implements Parcelable {
         this.favoriteButtonState = favoriteButtonState;
     }
 
+    public int getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
+    }
+
+    public byte[] getMovieImage() {
+        return movieImage;
+    }
+
+    public void setMovieImage(byte[] movieImage) {
+        this.movieImage = movieImage;
+    }
+
     // parcelable methods
     @Override
     public int describeContents() {
@@ -133,6 +151,7 @@ public class TmdbMovie implements Parcelable {
         dest.writeStringList(reviewNames);
         dest.writeStringList(reviewContent);
         dest.writeInt(favoriteButtonState);
+        dest.writeByteArray(movieImage);
     }
 
     public static final Parcelable.Creator<TmdbMovie> CREATOR = new Parcelable.Creator<TmdbMovie>() {
@@ -161,5 +180,6 @@ public class TmdbMovie implements Parcelable {
         reviewNames = source.createStringArrayList();
         reviewContent = source.createStringArrayList();
         favoriteButtonState = source.readInt();
+        movieImage = source.createByteArray();
     }
 }
