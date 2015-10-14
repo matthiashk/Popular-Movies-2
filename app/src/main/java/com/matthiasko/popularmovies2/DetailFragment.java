@@ -1,5 +1,6 @@
 package com.matthiasko.popularmovies2;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.PorterDuff;
@@ -21,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +30,7 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -46,7 +47,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private Uri mMovieUri;
 
-    private static final String[] PROJECTION = new String[] { "_id", "title", "poster_path", "plot",
+    private static final String[] PROJECTION = new String[]{"_id", "title", "poster_path", "plot",
             "user_rating", "release_date", "popularity", "vote_count", "movie_id", "favorite",
             "image", "trailers", "reviews"};
 
@@ -95,6 +96,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        //System.out.println("DetailFragment - onCreate");
     }
 
     @Override
@@ -142,6 +144,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 // call fetchfavoritetask to get the image into the db
                 // and set favorite to true in db
                 if (mPosterURL != null) {
+
+                    FetchFavoriteTask favoriteTask = new FetchFavoriteTask(getActivity());
+                    favoriteTask.execute(mPosterURL, mMovieId);
+
+                } else {
+
+                    String baseURL = "http://image.tmdb.org/t/p/";
+                    String thumbSize = "w185";
+                    mPosterURL = baseURL + thumbSize + mPosterPath;
+
                     FetchFavoriteTask favoriteTask = new FetchFavoriteTask(getActivity());
                     favoriteTask.execute(mPosterURL, mMovieId);
                 }
@@ -152,7 +164,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 toast.show();
 
                 return true;
-            }
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -166,13 +178,63 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+        //System.out.println("DetailFragment - onCreateView");
         /* called on start and on rotation */
         // container is null here b/c we are loading from xml?
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
 
+        //System.out.println("onCreateView - mTitle = " + mTitle);
+
+
         if (savedInstanceState != null) {
 
+            //System.out.println("onCreateView - savedInstanceState loading -----------");
+
             TmdbMovie movie = savedInstanceState.getParcelable("movie");
+
+            if (movie == null) {
+
+                //System.out.println("movie == null");
+
+                // just return view here to avoid crash.
+                // this will match if the user did not select any movie
+                // and rotates the device.
+
+
+                // load default blank detail fragment here???
+                // make an image with instruction to select movie here...
+
+                mRelativeLayout = (RelativeLayout) view.findViewById(R.id.details_layout);
+
+                TextView placeholderTextView = new TextView(getActivity());
+                placeholderTextView.setText("Please choose a movie from the list.");
+                placeholderTextView.setId(9999);
+                placeholderTextView.setTextSize(25);
+                placeholderTextView.setHeight(400);
+                placeholderTextView.setPadding(20, 20, 20, 20);
+                placeholderTextView.setBackgroundColor(getResources().getColor(R.color.lighterGrey));
+                placeholderTextView.setLayoutParams(new RelativeLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+                placeholderTextView.bringToFront();
+
+
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT,
+                        RelativeLayout.LayoutParams.MATCH_PARENT);
+
+
+                //layoutParams.addRule(RelativeLayout.BELOW, R.id.details_movie_title);
+                placeholderTextView.setLayoutParams(layoutParams);
+                mRelativeLayout.addView(placeholderTextView);
+
+
+
+                //View inflatedView = inflater.inflate(R.layout.detail_placeholder, container, false);
+
+
+                return view;
+            }
 
             // set variables here again, otherwise they will be null
             mTitle = movie.getTitle();
@@ -181,8 +243,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mPosterPath = movie.getPosterPath();
             mUserRating = movie.getUserRating();
             mFavorite = movie.getFavoriteButtonState();
-
             mMovieId = String.valueOf(movie.getMovieId());
+            mTrailersNameArray = movie.getTrailerNames();
+            mTrailersUrlArray = movie.getTrailerUrls();
+            mReviewsNameArray = movie.getReviewNames();
+            mReviewsContentArray = movie.getReviewContent();
+
+            mMovieImage = movie.getMovieImage();
+
+
+            //System.out.println("onCreateView trailerNames = " + movie.getTrailerNames().toString());
 
 
             ((TextView) view.findViewById(R.id.details_movie_title))
@@ -223,9 +293,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 // is a favorite, so fetch image from db
             } else if (mFavorite == 1) {
 
-                //System.out.println("fetching image from db = " + movieIdint);
+                //System.out.println("fetching image from db = " + mMovieId);
 
-                byte[] movieImage = movie.getMovieImage();
 
                 // create file to save the image in.
                 // use movie id as filename
@@ -238,7 +307,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     // save image from byte array to file
                     try {
                         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                        bos.write(movieImage);
+                        bos.write(mMovieImage);
                         bos.flush();
                         bos.close();
 
@@ -262,8 +331,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     .resize(600, 900)
                     .into(imageView);*/
 
-            createTrailerElements(movie.getTrailerNames(), movie.getTrailerUrls(), view);
-            createReviewElements(movie.getReviewNames(), movie.getReviewContent());
+            createTrailerElements(mTrailersNameArray, mTrailersUrlArray, view);
+            createReviewElements(mReviewsNameArray, mReviewsContentArray);
         }
         return view;
     }
@@ -280,6 +349,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        //System.out.println("DetailFragment - onCreateLoader");
 
         mTrailersNameArray.clear();
         mTrailersUrlArray.clear();
@@ -308,6 +379,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         // this block will get called multiple times
         // this will get called by FetchFavoriteTask also
+        // NOT called on rotation
+        // called x2 by onclick of gridfragment
+
+        //System.out.println("DetailFragment - onLoadFinished");
+
         if (mTrailersNameArray != null) {
             removePreviousElements(mButtonList, mTextViewList, getView());
         }
@@ -328,6 +404,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mTitle = data.getString(COL_MOVIE_TITLE);
             ((TextView) getView().findViewById(R.id.details_movie_title))
                     .setText(mTitle);
+
+            //System.out.println("onLoadFinished - mTitle = " + mTitle);
 
             mPlot = data.getString(COL_MOVIE_PLOT);
             ((TextView) getView().findViewById(R.id.details_plot))
@@ -358,6 +436,64 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             ImageView imageView = ((ImageView) getView().findViewById(R.id.details_imageview));
 
+
+            // check if the movie is a favorite
+            // if true, load from disk
+            if (mFavorite == 1) {
+
+                //System.out.println("onLoadFinished - mMovieId = "+ mMovieId);
+
+                mMovieImage = data.getBlob(COL_IMAGE);
+
+                // create file to save the image in.
+                // use movie id as filename
+                File file = new File(getActivity().getFilesDir(), mMovieId);
+
+                // check if the file is already on disk
+                // if it is, we dont need to write to file, just load it
+                if (file.isFile()) {
+
+                    Picasso.with(getActivity())
+                            .load(file)
+                            .placeholder(R.drawable.picasso_placeholder)
+                            .error(R.drawable.picasso_error_placeholder)
+                            .resize(600, 900)
+                            .into(imageView);
+                }
+
+
+            } else {
+
+                mPosterURL = baseURL + thumbSize + mPosterPath;
+                Picasso.with(getActivity())
+                        .load(mPosterURL)
+                        .resize(600, 900)
+                        .into(imageView);
+            }
+
+/*
+            // is the file exists, that means it is already loaded in the view - dont reload
+            // else get from internet
+            File file = new File(getActivity().getFilesDir(), mMovieId);
+
+            if (file.isFile()) {
+
+                System.out.println("FOUND FILE FOR " + mMovieId);
+
+            } else {
+
+                mPosterURL = baseURL + thumbSize + mPosterPath;
+                Picasso.with(getActivity())
+                        .load(mPosterURL)
+                        .resize(600, 900)
+                        .into(imageView);
+
+            }*/
+
+
+
+
+            /*
             // check if the movie is a favorite before displaying image
             // not a favorite, so fetch image from internet
             if (mFavorite == 0) {
@@ -370,7 +506,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             // is a favorite, so fetch image from db
             } else if (mFavorite == 1) {
 
-                //System.out.println("onLoadFinished - mMovieId = "+ mMovieId);
+                System.out.println("onLoadFinished - mMovieId = "+ mMovieId);
 
                 mMovieImage = data.getBlob(COL_IMAGE);
 
@@ -400,7 +536,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         .error(R.drawable.picasso_error_placeholder)
                         .resize(600, 900)
                         .into(imageView);
-            }
+            }*/
 
             try {
                 // dont populate array if the column is null
@@ -426,6 +562,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         if (i % 2 == 0) {
                             String stringValue = items.optString(i);
                             mTrailersNameArray.add(stringValue);
+                            //System.out.println("stringValue = " + stringValue);
                         }
                     }
                 }
@@ -468,8 +605,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void createTrailerElements(ArrayList<String> trailerNames, ArrayList<String> trailerUrls, final View view) {
-        // create trailer links here
+        // create trailer links here, use the number of urls to get the number of buttons we should
+        // make.
+
         if (trailerNames != null) {
+
+            //System.out.println("trailerNames = " + trailerNames.toString());
 
             mLastButtonId = trailerUrls.size(); // we need this to position the review textviews
 
@@ -532,7 +673,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 // setting up button placement in the view
                 // set the first button under the plot textview
-                if(i == 0) {
+                if (i == 0) {
                     layoutParams.addRule(RelativeLayout.BELOW, R.id.details_plot);
                     mButtonList.get(i).setLayoutParams(layoutParams);
                     mRelativeLayout.addView(mButtonList.get(i));
@@ -562,7 +703,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             int a = 1000; // use this to set textview ids ... ids must be unique!
 
-            for (int i=0; i < reviewNames.size(); i++) {
+            for (int i = 0; i < reviewNames.size(); i++) {
 
                 mTextViewList.get(i).setLayoutParams(new RelativeLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -589,9 +730,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 //layoutParams.setMargins(20, 10, 10, 10);
 
-                if(i == 0) {
+                if (i == 0) {
                     // set the review to be under the last button for trailers
-                    layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(mLastButtonId-1).getId());
+                    layoutParams.addRule(RelativeLayout.BELOW, mButtonList.get(mLastButtonId - 1).getId());
                     mTextViewList.get(i).setLayoutParams(layoutParams);
                     mRelativeLayout.addView(mTextViewList.get(i));
                 } else {
@@ -627,7 +768,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) { }
+    public void onLoaderReset(Loader<Cursor> loader) {
+    }
 
     /* called when item is selected from the gridview from mainactivity */
     public void updateArticleView(Bundle bundle) {
@@ -642,11 +784,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         /* put movie details in bundle and reload in oncreateview */
+        // called on rotation
 
         //System.out.println("onSaveInstanceState ---------");
         //System.out.println("onSaveInstanceState - mButtonList.size() = " + mButtonList.size());
         //System.out.println("onSaveInstanceState - mTitle = " + mTitle);
         //System.out.println("onSaveInstanceState - mTrailersNameArray = " + mTrailersNameArray.toString());
+
+
+        if (mTitle == null) {
+            // mTitle will be null if the user does not select a movie...
+            //System.out.println("onSaveInstanceState - mTitle == null");
+            return;
+        }
 
         TmdbMovie movie = new TmdbMovie();
         movie.setTitle(mTitle);
@@ -659,15 +809,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         movie.setReviewNames(mReviewsNameArray);
         movie.setReviewContent(mReviewsContentArray);
         movie.setFavoriteButtonState(mFavorite);
-
-        // if the movie is a favorite, save the image and id so we can recreate on rotation
-        if (mFavorite == 1) {
-
-            //System.out.println("onSaveInstanceState - mMovieId = " + mMovieId);
-
-            movie.setMovieId(Integer.parseInt(mMovieId));
-            movie.setMovieImage(mMovieImage);
-        }
+        movie.setMovieId(Integer.parseInt(mMovieId));
+        movie.setMovieImage(mMovieImage);
 
         outState.putParcelable("movie", movie);
     }
@@ -676,6 +819,30 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onSuccess() {
 
+        //System.out.println("DetailFragment - onSuccess");
+
+
+        // remove detailfragment placeholder view if it exists here
+
+        mRelativeLayout = (RelativeLayout) getView().findViewById(R.id.details_layout);
+
+
+        TextView placeholderTextView = (TextView) getView().findViewById(9999);
+
+
+        if (placeholderTextView == null) {
+
+            //System.out.println("placeholderTextView == null");
+        } else {
+
+            mRelativeLayout.removeView(placeholderTextView);
+
+            //System.out.println("found placeholderTextView");
+        }
+
+
+        //mRelativeLayout.removeView();
+        /*
         if (getView() != null) {
             // have the detail fragment scroll to top on click
             getView().findViewById(R.id.details_scrollview).post(new Runnable() {
@@ -686,7 +853,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 }
             });
 
-        }
+        }*/
 
         getLoaderManager().restartLoader(X_DETAIL_LOADER, null, this);
     }

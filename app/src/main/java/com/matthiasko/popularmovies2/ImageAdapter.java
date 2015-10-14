@@ -73,11 +73,12 @@ public class ImageAdapter extends CursorAdapter {
             File file = new File(context.getFilesDir(), cursor.getString(GridFragment.COL_MOVIE_ID));
 
             //String movieId = cursor.getString(GridFragment.COL_MOVIE_ID);
-            //System.out.println("movieId = " + movieId);
+            //System.out.println("ImageAdapter - movieId = " + movieId);
 
             // check if the file is already on disk
             // if it is, we dont need to write to file, just load it
             if (file.isFile()) {
+                //System.out.println("ImageAdapter - file found for " + movieId);
             } else {
                 // save image from byte array to file
                 try {
@@ -98,14 +99,5 @@ public class ImageAdapter extends CursorAdapter {
                     .resize(600, 900)
                     .into(viewHolder.posterView);
         }
-
-        /*
-        Picasso.with(context)
-                .load(finalURL)
-                .placeholder(R.drawable.picasso_placeholder)
-                .error(R.drawable.picasso_error_placeholder)
-                .resize(600, 900)
-                .into(viewHolder.posterView);
-                */
     }
 }

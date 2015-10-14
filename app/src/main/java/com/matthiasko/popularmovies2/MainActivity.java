@@ -22,13 +22,11 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
         // BUT we should only hide if we are in portrait mode and detail fragment is empty
 
         // hide the detail fragment in portrait mode
-
+        /*
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.detail_fragment);
 
-
         //System.out.println("detailFragment movie title = " + detailFragment.getTitle());
-
 
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -36,8 +34,37 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.hide(detailFragment);
             fragmentTransaction.commit();
+        }*/
+
+        GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.grid_fragment);
+
+        DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
+                .findFragmentByTag("detailFragmentTag");
+
+        int screenOrientation = getResources().getConfiguration().orientation;
+
+        // detect landscape mode, show gridfragment if true
+
+        if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.show(gridFragment);
+            fragmentTransaction.commit();
         }
 
+
+
+        /*
+        if (detailFragment != null) {
+
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.hide(gridFragment);
+            fragmentTransaction.commit();
+
+
+
+        }*/
 
 
         // dont show landscape mode on phones
@@ -58,7 +85,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.detail_fragment);
+                .findFragmentByTag("detailFragmentTag");
 
         GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.grid_fragment);
@@ -97,9 +124,13 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
 
     public void onArticleSelected(Bundle bundle) {
 
+
+
+
         // depending on the orientation, show the detail fragment or just update the data
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.detail_fragment);
+                .findFragmentByTag("detailFragmentTag");
+
 
         GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.grid_fragment);
@@ -107,9 +138,12 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
 
+
+
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
             fragmentTransaction.setCustomAnimations(R.anim.slide_in, R.anim.slide_out);
+            //fragmentTransaction.add(R.id.detail_fragment, detailFragment, "detailFragmentTag");
             fragmentTransaction.show(detailFragment);
             fragmentTransaction.hide(gridFragment);
             fragmentTransaction.commit();
@@ -118,16 +152,82 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        if (detailFragment != null) {
+        if (detailFragment == null) {
+
+
+
+
+        } else { // detail fragment not null so just update
             // send bundle from GridFragment to our DetailFragment
             detailFragment.updateArticleView(bundle);
         }
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // called on start and on rotation change
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // called on rotation, not on start
+
+        /* causes crash 'cannot perform action after onSaveInstanceState'
+        GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.grid_fragment);
+
+        int screenOrientation = getResources().getConfiguration().orientation;
+        if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.hide(gridFragment);
+            fragmentTransaction.commit();
+        }*/
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // called on rotation, not on start
+
+        /* doesnt hide gridview
+        GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.grid_fragment);
+
+        int screenOrientation = getResources().getConfiguration().orientation;
+        if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.hide(gridFragment);
+            fragmentTransaction.commit();
+        }*/
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.grid_fragment);
+
+        int screenOrientation = getResources().getConfiguration().orientation;
+        if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.hide(gridFragment);
+            fragmentTransaction.commit();
+
+            // show back button
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.detail_fragment);
+                .findFragmentByTag("detailFragmentTag");
 
         GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.grid_fragment);
@@ -137,9 +237,17 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
         // only execute if we are in portrait AND the gridPane is visible
         // we have to mirror this action for the back button on the action bar
 
+
+/*
+        if (detailFragment.getView().getVisibility() == View.VISIBLE) {
+            System.out.println("detail fragment view is visible");
+        } else {
+            System.out.println("detail fragment view is NOT visible");
+        }*/
+
         int screenOrientation = getResources().getConfiguration().orientation;
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT
-                && gridPane.getVisibility() == View.VISIBLE) {
+                && detailFragment.getView().getVisibility() == View.VISIBLE) {
 
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.setCustomAnimations(R.anim.exit_slide_in, R.anim.exit_slide_out);

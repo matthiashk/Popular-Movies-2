@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -129,27 +130,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        final DetailFragment detailFragment = (DetailFragment) getFragmentManager()
-                .findFragmentById(R.id.detail_fragment);
-
-        mGridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-
-            Cursor cursor = (Cursor) mGridview.getItemAtPosition(position);
-            if (cursor != null) {
-                Bundle bundle = new Bundle();
-                bundle.putString("movieURI", MovieContract.MovieEntry.buildMovieUri(cursor.getInt(COL_ID)).toString());
-                mCallback.onArticleSelected(bundle);
-
-                // call fetchextrastask with movie id as parameter
-                String movieIDString = String.valueOf(cursor.getInt(COL_MOVIE_ID));
-
-                FetchExtrasTask extrasTask = new FetchExtrasTask(getActivity(), detailFragment);
-                extrasTask.execute(movieIDString);
-            }
-            }
-        });
+        //final DetailFragment detailFragment = (DetailFragment) getFragmentManager().findFragmentByTag("detailFragmentTag");
 
         // set default values, only if they have not been set before
         PreferenceManager.setDefaultValues(getActivity(), R.xml.pref_general, false);
@@ -166,8 +147,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                 getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_sort_order_default));
 
-        //System.out.println("sortOrder = " + sortOrder);
-
         // check if db exists
         File pm2Db = getActivity().getDatabasePath("movies.db");
 
@@ -176,25 +155,67 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
             fetchMoviesTask.execute();
         }
 
+        if (savedInstanceState != null) {
+            // we need this otherwise the gridview will have no onclick actions after rotations
+
+            //System.out.println("gridfragment - onActivityCreated");
+
+            final DetailFragment xDetailFragment = (DetailFragment) getFragmentManager().findFragmentByTag("detailFragmentTag");
+
+            mGridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v,
+                                        int position, long id) {
+
+                    Cursor cursor = (Cursor) mGridview.getItemAtPosition(position);
+                    if (cursor != null) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("movieURI", MovieContract.MovieEntry.
+                                buildMovieUri(cursor.getInt(COL_ID)).toString());
+                        mCallback.onArticleSelected(bundle);
+
+                        // call fetchextrastask with movie id as parameter
+                        String movieIDString = String.valueOf(cursor.getInt(COL_MOVIE_ID));
+
+                        FetchExtrasTask extrasTask = new FetchExtrasTask(getActivity(), xDetailFragment);
+                        extrasTask.execute(movieIDString);
+                    }
+                }
+            });
+
+            getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+
+            return;
+        }
+
+        final DetailFragment detailFragment = new DetailFragment();
+
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.add(R.id.detail_fragment, detailFragment, "detailFragmentTag");
+        fragmentTransaction.hide(detailFragment);
+        fragmentTransaction.commit();
+
+        mGridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+
+                Cursor cursor = (Cursor) mGridview.getItemAtPosition(position);
+                if (cursor != null) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("movieURI", MovieContract.MovieEntry.
+                            buildMovieUri(cursor.getInt(COL_ID)).toString());
+                    mCallback.onArticleSelected(bundle);
+
+                    // call fetchextrastask with movie id as parameter
+                    String movieIDString = String.valueOf(cursor.getInt(COL_MOVIE_ID));
+
+                    FetchExtrasTask extrasTask = new FetchExtrasTask(getActivity(), detailFragment);
+                    extrasTask.execute(movieIDString);
+                }
+            }
+        });
+
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
 
-        /* // not needed remove?
-        if (savedInstanceState == null) {
-
-            //System.out.println("GRIDFRAGMENT - onActivityCreated - no savedInstanceState" );
-        } else {
-
-            //System.out.println("onActivityCreated - savedInstanceState ----------");
-
-            mScrollPosition = savedInstanceState.getInt("savedPosition");
-
-            System.out.println("onActivityCreated - mScrollPosition = " + mScrollPosition);
-
-            mGridview.setSelection(mScrollPosition);
-
-            // this fixed issues with displaying images after rotation change
-            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
-        }*/
     }
 
     @Override
