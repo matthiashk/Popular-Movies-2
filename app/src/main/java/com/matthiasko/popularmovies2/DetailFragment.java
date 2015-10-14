@@ -1,6 +1,5 @@
 package com.matthiasko.popularmovies2;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.PorterDuff;
@@ -22,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +30,6 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -73,7 +72,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private ShareActionProvider mShareActionProvider;
     private String mPosterURL = null;
     private String mMovieId = null;
-    private int mFavorite;
+    private Integer mFavorite;
 
     private String mTitle = null;
     private String mPlot = null;
@@ -114,8 +113,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        // check if the movie is a favorite and change menu icon if already favorited
 
+        // just return to avoid null exception
+        if (mFavorite == null){
+            return;
+        }
+
+        // check if the movie is a favorite and change menu icon if already favorited
         if (mFavorite == 0) {
             MenuItem favoriteButton = menu.findItem(R.id.action_favorite);
             favoriteButton.setIcon(R.drawable.ic_action_favorite);
@@ -133,6 +137,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 return true;
             case R.id.action_favorite:
                 getActivity().invalidateOptionsMenu();
+
+                // return false to avoid null exception
+                if (mFavorite == null) {
+                    return false;
+                }
 
                 // change mfavorite to 1 or toggle here
                 if (mFavorite == 0) {
@@ -842,18 +851,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
 
         //mRelativeLayout.removeView();
-        /*
+
         if (getView() != null) {
             // have the detail fragment scroll to top on click
             getView().findViewById(R.id.details_scrollview).post(new Runnable() {
                 @Override
                 public void run() {
                     ((ScrollView) getView().findViewById(R.id.details_scrollview)).
-                            smoothScrollTo(0, (getView().findViewById(R.id.detail_fragment)).getTop());
+                            scrollTo(0, (getView().findViewById(R.id.details_layout)).getTop());
                 }
             });
 
-        }*/
+        }
 
         getLoaderManager().restartLoader(X_DETAIL_LOADER, null, this);
     }
