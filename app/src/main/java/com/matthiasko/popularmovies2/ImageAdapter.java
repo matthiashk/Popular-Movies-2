@@ -63,7 +63,7 @@ public class ImageAdapter extends CursorAdapter {
                     .resize(600, 900)
                     .into(viewHolder.posterView);
 
-            // is a favorite, so fetch image from db
+        // is a favorite, so fetch image from db
         } else if (favorite == 1) {
 
             byte[] imageFromDB = cursor.getBlob(GridFragment.COL_IMAGE);

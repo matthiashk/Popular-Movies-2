@@ -1,12 +1,10 @@
 package com.matthiasko.popularmovies2;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -14,7 +12,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,18 +21,7 @@ import android.widget.GridView;
 import com.matthiasko.popularmovies2.data.MovieContract;
 import com.matthiasko.popularmovies2.data.MovieContract.MovieEntry;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Vector;
 
 /**
  * Created by matthiasko on 9/19/15.
@@ -108,10 +94,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         // save the position of the gridview, so we can restore it on rotation
-        //System.out.println("onSaveInstanceState ----------");
-        //System.out.println("onSaveInstanceState - mScrollPosition = " + mScrollPosition);
         outState.putInt("savedPosition", mScrollPosition);
     }
 
@@ -129,8 +112,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        //final DetailFragment detailFragment = (DetailFragment) getFragmentManager().findFragmentByTag("detailFragmentTag");
 
         // set default values, only if they have not been set before
         PreferenceManager.setDefaultValues(getActivity(), R.xml.pref_general, false);
@@ -157,8 +138,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
         if (savedInstanceState != null) {
             // we need this otherwise the gridview will have no onclick actions after rotations
-
-            //System.out.println("gridfragment - onActivityCreated");
 
             final DetailFragment xDetailFragment = (DetailFragment) getFragmentManager().findFragmentByTag("detailFragmentTag");
 
@@ -215,7 +194,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
         });
 
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
-
     }
 
     @Override
@@ -236,7 +214,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
             // set mSortOrder so we can read in onCreateLoader
             mSortOrder = sortOrder;
-            //System.out.println("onSharedPreferenceChanged");
             // refresh loader so we can change sort order
             getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
 
@@ -246,172 +223,6 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
                 FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity());
                 fetchMoviesTask.execute();
             }
-        }
-    }
-
-    public class FetchMoviesTask extends AsyncTask<String, Void, Void> {
-
-        private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
-        private final Context mContext;
-
-        public FetchMoviesTask(Context context) {
-            mContext = context;
-        }
-
-        private void getMovieDataFromJson(String forecastJsonStr)
-                throws JSONException {
-
-            // the strings should match the api strings
-            final String TMDB_TITLE = "title";
-            final String TMDB_POSTER_PATH = "poster_path";
-            final String TMDB_PLOT = "overview";
-            final String TMDB_USER_RATING = "vote_average";
-            final String TMDB_RELEASE_DATE = "release_date";
-
-            final String TMDB_POPULARITY = "popularity";
-            final String TMDB_VOTE_COUNT = "vote_count";
-
-            final String TMDB_MOVIE_ID = "id";
-
-            try {
-
-                JSONObject forecastJson = new JSONObject(forecastJsonStr);
-
-                JSONArray jArray = forecastJson.getJSONArray("results");
-
-                // Insert the new information into the database
-                Vector<ContentValues> cVVector = new Vector<ContentValues>(jArray.length());
-
-                for (int i = 0; i < jArray.length(); i++) {
-
-                    JSONObject oneObject = jArray.getJSONObject(i);
-                    // Pulling items from the array
-                    String title = oneObject.getString(TMDB_TITLE);
-                    String posterPath = oneObject.getString(TMDB_POSTER_PATH);
-                    String plot = oneObject.getString(TMDB_PLOT);
-                    double userRating = oneObject.getDouble(TMDB_USER_RATING);
-                    String releaseDate = oneObject.getString(TMDB_RELEASE_DATE);
-                    int popularity = oneObject.getInt(TMDB_POPULARITY);
-                    int voteCount = oneObject.getInt(TMDB_VOTE_COUNT);
-                    int movieID = oneObject.getInt(TMDB_MOVIE_ID);
-
-                    ContentValues movieValues = new ContentValues();
-
-                    movieValues.put(MovieEntry.COLUMN_MOVIE_ID, movieID);
-                    movieValues.put(MovieEntry.COLUMN_TITLE, title);
-                    movieValues.put(MovieEntry.COLUMN_POSTER_PATH, posterPath);
-                    movieValues.put(MovieEntry.COLUMN_PLOT, plot);
-                    movieValues.put(MovieEntry.COLUMN_USER_RATING, userRating);
-                    movieValues.put(MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
-                    movieValues.put(MovieEntry.COLUMN_POPULARITY, popularity);
-                    movieValues.put(MovieEntry.COLUMN_VOTE_COUNT, voteCount);
-                    movieValues.put(MovieEntry.COLUMN_FAVORITE, 0);
-
-                    cVVector.add(movieValues);
-                }
-
-
-                int inserted = 0;
-                // add to database
-                if (cVVector.size() > 0) {
-                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                    cVVector.toArray(cvArray);
-                    inserted = mContext.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI, cvArray);
-                }
-
-
-            }
-
-            catch(JSONException e){
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-            /* Create api url request and send results to json parser. */
-
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            // Will contain the raw JSON response as a string.
-            String moviesJsonStr;
-
-            // Get sort order from preferences.
-            SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(mContext);
-            String sortOrder = sharedPrefs.getString(
-                    getString(R.string.pref_sort_order_key),
-                    getString(R.string.pref_sort_order_default));
-
-            //System.out.println("sortOrder = " + sortOrder);
-
-            try {
-                final String MOVIE_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
-                final String SORT_BY_PARAM = "sort_by";
-                final String API_KEY_PARAM = "api_key";
-                final String VOTE_COUNT = "vote_count.gte";
-
-                Uri builtUri = Uri.parse(MOVIE_BASE_URL)
-                        .buildUpon()
-                        .appendQueryParameter(SORT_BY_PARAM, sortOrder)
-                        .appendQueryParameter(VOTE_COUNT, "75")
-                        .appendQueryParameter(API_KEY_PARAM, mGridContext.getResources().getString(R.string.api_key))
-                        .build();
-
-                URL url = new URL(builtUri.toString());
-
-                //System.out.println("builtUri = " + builtUri.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                moviesJsonStr = buffer.toString();
-
-                getMovieDataFromJson(moviesJsonStr);
-
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
-
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-
-            finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-            return null;
         }
     }
 

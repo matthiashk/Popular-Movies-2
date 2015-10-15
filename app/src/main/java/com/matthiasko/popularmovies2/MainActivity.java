@@ -26,7 +26,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
         int screenOrientation = getResources().getConfiguration().orientation;
 
         // detect landscape mode, show gridfragment if true
-
         if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
 
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -47,8 +46,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
         return true;
     }
 
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         DetailFragment detailFragment = (DetailFragment) getSupportFragmentManager()
@@ -67,6 +64,8 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
 
         if (id == android.R.id.home) {
 
+            // we need the selected state to determine if a movie has been selected in the
+            // gridfragment, if not we dont want to show the detailfragment in portrait mode
             isSelected = false;
 
             View gridPane = findViewById(R.id.detail_fragment);
@@ -112,13 +111,11 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
             fragmentTransaction.hide(gridFragment);
             fragmentTransaction.commit();
 
-            // show back button
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        if (detailFragment == null) {
-
-        } else { // detail fragment not null so just update
+        if (detailFragment != null) {
+            // detail fragment not null so just update
             // send bundle from GridFragment to our DetailFragment
             detailFragment.updateArticleView(bundle);
         }
@@ -161,7 +158,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
 
             GridFragment gridFragment = (GridFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.grid_fragment);
-
             int screenOrientation = getResources().getConfiguration().orientation;
             if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
 
@@ -169,7 +165,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
                 fragmentTransaction.hide(gridFragment);
                 fragmentTransaction.commit();
 
-                // show back button
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
         } else {
@@ -183,7 +178,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
                 fragmentTransaction.hide(detailFragment);
                 fragmentTransaction.commit();
 
-                // show back button
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             }
         }
@@ -213,7 +207,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
             fragmentTransaction.hide(detailFragment);
             fragmentTransaction.commit();
 
-            // hide back button
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         } else {
             super.onBackPressed();

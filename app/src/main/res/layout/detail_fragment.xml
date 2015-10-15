@@ -17,14 +17,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="35sp"
-        android:paddingLeft="10dp"
+        android:paddingLeft="@dimen/label_padding_left"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="#000000"
-        android:textColor="#ffffff" />
+        android:background="@android:color/black"
+        android:textColor="@android:color/white" />
 
     <ImageView
         android:id="@+id/details_imageview"
@@ -41,9 +41,9 @@
         android:id="@+id/details_plot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
+        android:textSize="@dimen/label_text_size"
         android:paddingTop="20dp"
-        android:paddingLeft="10dp"
+        android:paddingLeft="@dimen/label_padding_left"
         android:paddingRight="10dp"
         android:paddingBottom="30dp"
         android:layout_below="@+id/details_imageview" />
@@ -52,8 +52,8 @@
         android:id="@+id/details_release_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:paddingLeft="10dp"
+        android:textSize="@dimen/label_text_size"
+        android:paddingLeft="@dimen/label_padding_left"
         android:paddingTop="5dp"
         android:layout_below="@+id/details_release_date_label"
         android:layout_toRightOf="@+id/details_imageview" />
@@ -62,8 +62,8 @@
         android:id="@+id/details_user_rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:paddingLeft="10dp"
+        android:textSize="@dimen/label_text_size"
+        android:paddingLeft="@dimen/label_padding_left"
         android:paddingTop="5dp"
         android:layout_below="@+id/details_user_rating_label"
         android:layout_toRightOf="@+id/details_imageview" />
@@ -73,9 +73,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/release_date_label"
-        android:textSize="18sp"
+        android:textSize="@dimen/label_text_size"
         android:paddingTop="10dp"
-        android:paddingLeft="10dp"
+        android:paddingLeft="@dimen/label_padding_left"
         android:layout_alignTop="@+id/details_imageview"
         android:layout_toRightOf="@+id/details_imageview"
         android:layout_toEndOf="@+id/details_imageview" />
@@ -85,8 +85,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/user_rating_label"
-        android:textSize="18sp"
-        android:paddingLeft="10dp"
+        android:textSize="@dimen/label_text_size"
+        android:paddingLeft="@dimen/label_padding_left"
         android:paddingTop="10dp"
         android:layout_below="@+id/details_release_date"
         android:layout_toRightOf="@+id/details_imageview" />
