@@ -1,7 +1,6 @@
 package com.matthiasko.popularmovies2;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -31,11 +30,6 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.show(gridFragment);
             fragmentTransaction.commit();
-        }
-
-        // dont show landscape mode on phones
-        if(getResources().getBoolean(R.bool.portrait_only)){
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
     }
 
