@@ -1,7 +1,7 @@
 # Popular-Movies-2
 Popular Movies Stage 2
 
-![alt text](https://www.dropbox.com/s/9rl27pwaim1gcdi/Screenshot_2016-07-26-15-19-24.jpg?dl=0)
+![alt text](https://dl.dropboxusercontent.com/s/9rl27pwaim1gcdi/Screenshot_2016-07-26-15-19-24.jpg)
 
 Note: Please change the value for "api_key" in values/strings.xml before running
 the program.
