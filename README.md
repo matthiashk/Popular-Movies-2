@@ -1,9 +1,7 @@
 # Popular-Movies-2
 Popular Movies Stage 2
 
-<img src="https://dl.dropboxusercontent.com/s/9rl27pwaim1gcdi/Screenshot_2016-07-26-15-19-24.jpg?dl=0" width="300 height="400/>
-
-<img src="https://dl.dropboxusercontent.com/s/ey44klik30f3i13/Screenshot_2016-07-26-15-20-20.jpg?dl=0" width="300 height="400/>
+<img src="https://dl.dropboxusercontent.com/s/9rl27pwaim1gcdi/Screenshot_2016-07-26-15-19-24.jpg?dl=0" width="300 height="400/> <img src="https://dl.dropboxusercontent.com/s/ey44klik30f3i13/Screenshot_2016-07-26-15-20-20.jpg?dl=0" width="300 height="400/>
 
 <img src="https://dl.dropboxusercontent.com/s/miwuktpyujm8nw5/Screenshot_2016-07-26-15-23-02.jpg?dl=0" width="500 height="300/>
 
