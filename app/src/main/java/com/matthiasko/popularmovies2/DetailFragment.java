@@ -507,7 +507,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 mButtonList.get(i).setId(z);
 
-                mButtonList.get(i).getBackground().setColorFilter(getResources().getColor(R.color.darkGrey2), PorterDuff.Mode.MULTIPLY);
+                mButtonList.get(i).getBackground().setColorFilter(getResources().getColor(android.R.color.black), PorterDuff.Mode.MULTIPLY);
                 mButtonList.get(i).setTextColor(getResources().getColor(R.color.lighterGrey));
                 mButtonList.get(i).setText(trailerNames.get(i));
 
@@ -578,7 +578,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 mTextViewList.get(i).setId(a);
 
-                mTextViewList.get(i).setTextColor(getResources().getColor(R.color.darkGrey));
+                mTextViewList.get(i).setTextColor(getResources().getColor(android.R.color.black));
                 mTextViewList.get(i).setBackground(getResources().getDrawable(R.drawable.borderbottom));
 
                 // add reviewer name + newline x2 + review content
