@@ -75,7 +75,7 @@ public class GridFragment extends Fragment implements SharedPreferences.OnShared
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.grid_frament, container, false);
+        View view = inflater.inflate(R.layout.grid_fragment, container, false);
 
         mImageAdapter = new ImageAdapter(getActivity().getApplicationContext(), null, 0);
         mGridview = (GridView) view.findViewById(R.id.gridview);

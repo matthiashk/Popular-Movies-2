@@ -72,7 +72,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
                     && gridPane.getVisibility() == View.VISIBLE) {
 
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.setCustomAnimations(R.anim.exit_slide_in, R.anim.exit_slide_out);
+                //fragmentTransaction.setCustomAnimations(R.anim.exit_slide_in, R.anim.exit_slide_out);
                 fragmentTransaction.show(gridFragment);
                 fragmentTransaction.hide(detailFragment);
                 fragmentTransaction.commit();
@@ -100,7 +100,7 @@ public class MainActivity extends ActionBarActivity implements GridFragment.OnMo
         if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
 
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.setCustomAnimations(R.anim.slide_in, R.anim.slide_out);
+            //fragmentTransaction.setCustomAnimations(R.anim.slide_in, R.anim.slide_out);
             fragmentTransaction.show(detailFragment);
             fragmentTransaction.hide(gridFragment);
             fragmentTransaction.commit();
