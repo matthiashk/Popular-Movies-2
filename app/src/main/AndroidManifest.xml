@@ -27,6 +27,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.matthiasko.popularmovies2.MainActivity" />
         </activity>
+
+        <activity android:name="com.matthiasko.popularmovies2.SearchActivity"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+        </activity>
+
         <provider
             android:name=".data.MovieProvider"
             android:authorities="com.matthiasko.popularmovies2" />

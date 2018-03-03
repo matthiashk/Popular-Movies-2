@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Popular Movies 2</string>
+    <string name="app_name">Movies</string>
 
     <string name="textview_title">Movie Title</string>
     <string name="action_settings">Settings</string>
@@ -18,6 +18,10 @@
 
     <string name="title_activity_detail">DetailActivity</string>
     <string name="title_activity_test">test</string>
+
+    <string name="app_label">Search</string>
+    <string name="search_hint">Movie Name</string>
+    <string name="search_label">Search Label</string>
 
     <string name="release_date_label">Release Date:</string>
     <string name="user_rating_label">User Rating:</string>
