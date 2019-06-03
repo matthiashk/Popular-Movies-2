@@ -3,10 +3,8 @@ Popular Movies Stage 2
 
 ![screenshots](http://www.matthiashko.com/images/popular-movies-app.jpg)
 
-
-
-Note: Please change the value for "api_key" in values/strings.xml before running
-the program.
+Note: Please enter your own "api_key" in values/strings.xml before running
+the program. See [The Movie Database API!](https://developers.themoviedb.org/3/getting-started/introduction) for more information on how to obtain an API key.
 
 Description:  
 The Popular Movies Stage 2 app builds on the Popular-Movies-1 app to add
